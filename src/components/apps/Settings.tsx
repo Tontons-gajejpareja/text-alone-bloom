@@ -1305,7 +1305,17 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
                   </p>
                 </div>
 
-                <div className="pt-4 border-t">
+                <div className="pt-4 border-t space-y-2">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      localStorage.removeItem("urbanshade_last_seen_version");
+                      window.location.reload();
+                    }}
+                  >
+                    View Changelog
+                  </Button>
                   <Button variant="outline" className="w-full">
                     View Open Source Licenses
                   </Button>

@@ -64,7 +64,7 @@ interface WindowData {
   zIndex: number;
 }
 
-import { GenericInstaller } from "./apps/GenericInstaller";
+import { UrbanshadeInstaller } from "./apps/UrbanshadeInstaller";
 
 export const WindowManager = ({ windows, onClose, onFocus, allWindows, onCloseWindow, onCriticalKill, onOpenAdminPanel, onLockdown, onUpdate }: WindowManagerProps) => {
   const getAppContent = (appId: string) => {
@@ -159,7 +159,7 @@ export const WindowManager = ({ windows, onClose, onFocus, allWindows, onCloseWi
       case "pdf-reader":
         return <PdfReader />;
       case "installer":
-        return <GenericInstaller onComplete={() => {
+        return <UrbanshadeInstaller onComplete={() => {
           const windowId = windows.find(w => w.app.id === appId)?.id;
           if (windowId) onCloseWindow(windowId);
         }} />;

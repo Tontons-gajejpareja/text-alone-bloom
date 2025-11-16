@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Grid3x3, Trash2, Settings as SettingsIcon, ZoomIn, ZoomOut, Eye, Layers } from "lucide-react";
+import { Grid3x3, Trash2, Settings as SettingsIcon, ZoomIn, ZoomOut, Eye, Layers, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { saveState, loadState } from "@/lib/persistence";
 import { RoomProperties } from "./RoomProperties";
@@ -55,6 +55,7 @@ export const FacilityPlanner = () => {
   const canvasRef = useRef<HTMLDivElement>(null);
   const [hallwayWidth, setHallwayWidth] = useState(40);
   const [hallwayCounter, setHallwayCounter] = useState(1);
+  const [hallwayEditMode, setHallwayEditMode] = useState(false);
 
   const [betaDialogOpen, setBetaDialogOpen] = useState(() => {
     return !localStorage.getItem('facility_planner_beta_acknowledged');
@@ -344,12 +345,30 @@ export const FacilityPlanner = () => {
           </Button>
           <Button
             size="sm"
+            variant={hallwayEditMode ? "default" : "outline"}
+            onClick={() => {
+              setHallwayEditMode(!hallwayEditMode);
+              if (!hallwayEditMode) {
+                setSelectedRoomId(null);
+                setMode("facility");
+                toast.info("Click hallways to select, right-click to delete, click endpoints to create new hallways");
+              } else {
+                setSelectedHallwayId(null);
+              }
+            }}
+          >
+            <Edit className="w-4 h-4 mr-1" />
+            {hallwayEditMode ? "Exit Hallway Edit" : "Edit Hallways"}
+          </Button>
+          <Button
+            size="sm"
             variant={mode === "hallway" ? "default" : "outline"}
             onClick={() => {
               if (mode === "hallway") {
                 cancelHallway();
               } else {
                 setMode("hallway");
+                setHallwayEditMode(false);
                 toast.info("Click to draw hallway points");
               }
             }}
@@ -499,8 +518,8 @@ export const FacilityPlanner = () => {
             return (
               <div key={room.id}>
                 <div
-                  className={`absolute border-2 cursor-move transition-all animate-fade-in ${
-                    selectedRoomId === room.id ? 'border-primary ring-2 ring-primary/50' : 'border-border'
+                  className={`absolute border-2 cursor-move transition-all duration-200 animate-fade-in hover:scale-105 ${
+                    selectedRoomId === room.id ? 'border-primary ring-2 ring-primary/50 scale-105' : 'border-border'
                   }`}
                   style={{
                     left: room.x,
@@ -509,7 +528,17 @@ export const FacilityPlanner = () => {
                     height: room.height,
                     backgroundColor: room.gridShape ? 'transparent' : getRoomBackgroundColor(room.type),
                   }}
-                  onMouseDown={(e) => handleRoomMouseDown(e, room.id)}
+                  onClick={() => {
+                    if (!hallwayEditMode) {
+                      setSelectedRoomId(room.id);
+                      setSelectedHallwayId(null);
+                    }
+                  }}
+                  onMouseDown={(e) => {
+                    if (!hallwayEditMode) {
+                      handleRoomMouseDown(e, room.id);
+                    }
+                  }}
                 >
                   {renderCustomShape()}
                   <div className="p-2 relative z-10">
@@ -523,21 +552,88 @@ export const FacilityPlanner = () => {
           })}
 
           {hallwaySegments.map(hallway => (
-            <svg key={hallway.id} className="absolute top-0 left-0 pointer-events-none" style={{ width: '2000px', height: '2000px' }}>
+            <svg key={hallway.id} className="absolute top-0 left-0" style={{ width: '2000px', height: '2000px', pointerEvents: 'none' }}>
               {hallway.points.map((point, i) => {
                 if (i === hallway.points.length - 1) return null;
                 const next = hallway.points[i + 1];
                 return (
-                  <line
-                    key={i}
-                    x1={point.x}
-                    y1={point.y}
-                    x2={next.x}
-                    y2={next.y}
-                    stroke="hsl(var(--muted-foreground))"
-                    strokeWidth={hallway.width}
-                    opacity="0.3"
-                  />
+                  <g key={i}>
+                    <line
+                      x1={point.x}
+                      y1={point.y}
+                      x2={next.x}
+                      y2={next.y}
+                      stroke={selectedHallwayId === hallway.id ? "#00ffff" : "hsl(var(--muted-foreground))"}
+                      strokeWidth={hallway.width}
+                      opacity={selectedHallwayId === hallway.id ? "1" : "0.3"}
+                      className="transition-all duration-200"
+                      style={{ 
+                        pointerEvents: hallwayEditMode ? 'stroke' : 'none',
+                        cursor: hallwayEditMode ? 'pointer' : 'default'
+                      }}
+                      onClick={(e) => {
+                        if (hallwayEditMode) {
+                          e.stopPropagation();
+                          setSelectedHallwayId(hallway.id);
+                          setSelectedRoomId(null);
+                        }
+                      }}
+                      onContextMenu={(e) => {
+                        if (hallwayEditMode) {
+                          e.preventDefault();
+                          if (window.confirm('Delete this hallway?')) {
+                            setHallwaySegments(prev => prev.filter(h => h.id !== hallway.id));
+                            setSelectedHallwayId(null);
+                            toast.success("Hallway deleted");
+                          }
+                        }
+                      }}
+                    />
+                    {hallwayEditMode && (
+                      <>
+                        <circle
+                          cx={point.x}
+                          cy={point.y}
+                          r="8"
+                          fill={selectedHallwayId === hallway.id ? "#00ffff" : "#0078D7"}
+                          className="cursor-pointer hover:scale-125 transition-transform"
+                          style={{ pointerEvents: 'all' }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const newHallway = {
+                              id: `hallway-${Date.now()}`,
+                              points: [{ x: point.x, y: point.y }, { x: point.x + 100, y: point.y }],
+                              width: hallway.width
+                            };
+                            setHallwaySegments(prev => [...prev, newHallway]);
+                            setSelectedHallwayId(newHallway.id);
+                            toast.success("New hallway created from endpoint");
+                          }}
+                        />
+                        {i === hallway.points.length - 2 && (
+                          <circle
+                            cx={next.x}
+                            cy={next.y}
+                            r="8"
+                            fill={selectedHallwayId === hallway.id ? "#00ffff" : "#0078D7"}
+                            className="cursor-pointer hover:scale-125 transition-transform"
+                            style={{ pointerEvents: 'all' }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const newHallway = {
+                                id: `hallway-${Date.now()}`,
+                                points: [{ x: next.x, y: next.y }, { x: next.x + 100, y: next.y }],
+                                width: hallway.width
+                              };
+                              setHallwaySegments(prev => [...prev, newHallway]);
+                              setSelectedHallwayId(newHallway.id);
+                              toast.success("New hallway created from endpoint");
+                            }}
+                          />
+                        )}
+                      </>
+                    )}
+                  </g>
                 );
               })}
             </svg>
