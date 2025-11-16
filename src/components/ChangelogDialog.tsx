@@ -19,6 +19,43 @@ export const ChangelogDialog = () => {
     setOpen(false);
   };
 
+  const changelog = {
+    "Major Features": [
+      "Enhanced Facility Planner",
+      "Urbanshade Installer: actually does stuff that an installer would do",
+      "About System: Github stuff and what not",
+      "Working Updates: System can now update i hope (only visual :D)"
+    ],
+    "OOBE Improvements": [
+      "Extended to 18 bcuz yes",
+      "Configure OEM unlock, works i hope"
+    ],
+    "Account & Recovery": [
+      "New accounts are now existing i think",
+      "Recovery mode options now perform actual system operations (Should've fixed years ago-)"
+    ],
+    "UI/UX Enhancements": [
+      "Enhanced animations throughout the system",
+      "Improved visual feedback and transitions"
+    ],
+    "Settings": [
+      "Added more settings",
+      "Made it actually do stuff :fire:"
+    ],
+    "FACILITY PLANNER (This took too long): [
+      "Made it actually humanly usable",
+      "You can actually do stuff with it now"
+    ],
+    "Installer": [
+      "Its actually somewhat an installer",
+      "smth smth :D"
+    ],
+    "Made installer work i hope": [
+      "yea u gotta install apps to use them (WOW NO WAY)",
+      "i hope it works :/"
+    ]
+  };
+
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto animate-scale-in">
@@ -28,87 +65,28 @@ export const ChangelogDialog = () => {
             What's New in URBANSHADE OS v{currentVersion}
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-6 py-4">
-          {/* Major Features */}
-          <div className="space-y-3">
-            <h3 className="text-lg font-bold text-primary flex items-center gap-2">
-              <Check className="w-5 h-5" />
-              Major Features
-            </h3>
-            <ul className="space-y-2 text-sm ml-7">
-              <li className="flex items-start gap-2 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-                <span className="text-primary mt-0.5">•</span>
-                <span><strong>Enhanced Facility Planner:</strong> Visible room connections, zoom/pan controls, snap-to-grid options, and editable hallways</span>
-              </li>
-              <li className="flex items-start gap-2 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-                <span className="text-primary mt-0.5">•</span>
-                <span><strong>Urbanshade Installer:</strong> Professional installation wizard with customizable options</span>
-              </li>
-              <li className="flex items-start gap-2 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-                <span className="text-primary mt-0.5">•</span>
-                <span><strong>About System:</strong> View contributors, GitHub repository, and system information</span>
-              </li>
-              <li className="flex items-start gap-2 animate-fade-in" style={{ animationDelay: "0.4s" }}>
-                <span className="text-primary mt-0.5">•</span>
-                <span><strong>Working Updates:</strong> System can now check for and install updates</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* OOBE Improvements */}
-          <div className="space-y-3">
-            <h3 className="text-lg font-bold text-primary flex items-center gap-2">
-              <Check className="w-5 h-5" />
-              OOBE Improvements
-            </h3>
-            <ul className="space-y-2 text-sm ml-7">
-              <li className="flex items-start gap-2 animate-fade-in" style={{ animationDelay: "0.5s" }}>
-                <span className="text-primary mt-0.5">•</span>
-                <span>Extended to 18 steps with more customization options</span>
-              </li>
-              <li className="flex items-start gap-2 animate-fade-in" style={{ animationDelay: "0.6s" }}>
-                <span className="text-primary mt-0.5">•</span>
-                <span>Configure OEM unlock, developer options, storage, and security during setup</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Account & Recovery */}
-          <div className="space-y-3">
-            <h3 className="text-lg font-bold text-primary flex items-center gap-2">
-              <Check className="w-5 h-5" />
-              Account & Recovery
-            </h3>
-            <ul className="space-y-2 text-sm ml-7">
-              <li className="flex items-start gap-2 animate-fade-in" style={{ animationDelay: "0.7s" }}>
-                <span className="text-primary mt-0.5">•</span>
-                <span>New accounts are now fully functional and usable</span>
-              </li>
-              <li className="flex items-start gap-2 animate-fade-in" style={{ animationDelay: "0.8s" }}>
-                <span className="text-primary mt-0.5">•</span>
-                <span>Recovery mode options now perform actual system operations</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* UI/UX Enhancements */}
-          <div className="space-y-3">
-            <h3 className="text-lg font-bold text-primary flex items-center gap-2">
-              <Check className="w-5 h-5" />
-              UI/UX Enhancements
-            </h3>
-            <ul className="space-y-2 text-sm ml-7">
-              <li className="flex items-start gap-2 animate-fade-in" style={{ animationDelay: "0.9s" }}>
-                <span className="text-primary mt-0.5">•</span>
-                <span>Enhanced animations throughout the system</span>
-              </li>
-              <li className="flex items-start gap-2 animate-fade-in" style={{ animationDelay: "1s" }}>
-                <span className="text-primary mt-0.5">•</span>
-                <span>Improved visual feedback and transitions</span>
-              </li>
-            </ul>
-          </div>
+          {Object.entries(changelog).map(([section, items], sectionIndex) => (
+            <div key={section} className="space-y-3">
+              <h3 className="text-lg font-bold text-primary flex items-center gap-2">
+                <Check className="w-5 h-5" />
+                {section}
+              </h3>
+              <ul className="space-y-2 text-sm ml-7">
+                {items.map((text, i) => (
+                  <li
+                    key={i}
+                    className="flex items-start gap-2 animate-fade-in"
+                    style={{ animationDelay: `${0.1 * (sectionIndex * 5 + i)}s` }}
+                  >
+                    <span className="text-primary mt-0.5">•</span>
+                    <span>{text}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
 
           <div className="pt-4 border-t border-border/50">
             <p className="text-xs text-muted-foreground text-center">
