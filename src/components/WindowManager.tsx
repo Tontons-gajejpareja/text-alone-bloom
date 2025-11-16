@@ -55,11 +55,18 @@ interface WindowManagerProps {
   onCriticalKill: (processName: string, type?: "kernel" | "virus" | "bluescreen" | "memory" | "corruption" | "overload") => void;
   onOpenAdminPanel?: () => void;
   onLockdown?: (protocolName: string) => void;
+  onUpdate?: () => void;
 }
 
-import { GenericInstaller } from "./apps/GenericInstaller";
+interface WindowData {
+  id: string;
+  app: App;
+  zIndex: number;
+}
 
-export const WindowManager = ({ windows, onClose, onFocus, allWindows, onCloseWindow, onCriticalKill, onOpenAdminPanel, onLockdown }: WindowManagerProps) => {
+import { UrbanshadeInstaller } from "./apps/UrbanshadeInstaller";
+
+export const WindowManager = ({ windows, onClose, onFocus, allWindows, onCloseWindow, onCriticalKill, onOpenAdminPanel, onLockdown, onUpdate }: WindowManagerProps) => {
   const getAppContent = (appId: string) => {
     switch (appId) {
       case "app-store":
@@ -120,7 +127,7 @@ export const WindowManager = ({ windows, onClose, onFocus, allWindows, onCloseWi
       case "crash-app":
         return <CrashApp onCrash={() => onCriticalKill("SYSTEM_CRASH", "kernel")} />;
       case "settings":
-        return <Settings />;
+        return <Settings onUpdate={onUpdate} />;
       case "registry":
         return <RegistryEditor />;
       case "disk-manager":
@@ -152,7 +159,7 @@ export const WindowManager = ({ windows, onClose, onFocus, allWindows, onCloseWi
       case "pdf-reader":
         return <PdfReader />;
       case "installer":
-        return <GenericInstaller onComplete={() => {
+        return <UrbanshadeInstaller onComplete={() => {
           const windowId = windows.find(w => w.app.id === appId)?.id;
           if (windowId) onCloseWindow(windowId);
         }} />;
