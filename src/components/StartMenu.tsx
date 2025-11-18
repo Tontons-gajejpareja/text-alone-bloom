@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { App } from "./Desktop";
-import { LogOut, Activity, RotateCcw } from "lucide-react";
+import { LogOut, Activity, RotateCcw, Power } from "lucide-react";
 
 interface StartMenuProps {
   open: boolean;
@@ -8,10 +8,11 @@ interface StartMenuProps {
   onClose: () => void;
   onOpenApp: (app: App) => void;
   onReboot: () => void;
+  onShutdown: () => void;
   onLogout: () => void;
 }
 
-export const StartMenu = ({ open, apps, onClose, onOpenApp, onReboot, onLogout }: StartMenuProps) => {
+export const StartMenu = ({ open, apps, onClose, onOpenApp, onReboot, onShutdown, onLogout }: StartMenuProps) => {
   const [search, setSearch] = useState("");
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -110,6 +111,16 @@ export const StartMenu = ({ open, apps, onClose, onOpenApp, onReboot, onLogout }
             </button>
 
             <div className="flex gap-2">
+              <button 
+                onClick={() => {
+                  onShutdown();
+                  onClose();
+                }}
+                className="w-10 h-10 rounded-lg hover:bg-muted/50 flex items-center justify-center transition-all group"
+                title="Shut down"
+              >
+                <Power className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+              </button>
               <button 
                 onClick={() => {
                   onReboot();
