@@ -31,6 +31,55 @@ Online/offline:
 Update cycle: every 2nd week on Friday - Sunday we push an update (hopefully)
 
 ---
+## What is this in the first place?
+
+Urbanshade OS is a browser-first operating system project focused on a playful, developer-friendly desktop environment with a strong emphasis on documentation, package distribution (UUR), and developer tooling.
+
+### Highlights - Bigger features you should know about
+
+- Online Accounts & Cloud Sync (Introduced in v2.6, improved in v2.7)
+  - Full Supabase-backed online account system: sign up / sign in, profile (display name + avatar), and account management.
+  - Automatic and manual sync of settings, desktop icons, installed apps, and system state.
+  - Visual sync indicators in the taskbar and Start Menu; UUR submissions can sync to Supabase cloud storage.
+  - Better feedback and status display for cloud operations.
+
+- UUR Manager & Package Ecosystem (Introduced in V2.5)
+  - UUR Manager app (desktop + terminal access) for discovering, submitting, installing, and running packages.
+  - Built-in sample packages (Hello World, System Info) and a GitHub-based submission + review workflow for community contributions.
+  - Redesigned UUR Manager UI (v2.7): sidebar navigation, category filters, richer package cards, search improvements, and a statistics dashboard.
+  - Real-time submission status backed by cloud storage.
+
+- DEF-DEV (Developer Mode) Overhaul (Base made in V2.1, made public in V2.3)
+  - Comprehensive DEF-DEV documentation and a multi-tab terminal experience (Console, Actions, Storage, Terminal).
+  - New DEF-DEV Terminal with command queue and remote execution support; action monitoring with persistence and consent flows.
+  - First-boot DEF-DEV setup with explicit consent, alternative dev storage for development, and improved crash entry workflows.
+
+- Bugcheck / Crash Handling
+  - New BugcheckScreen with severity levels, readable explanations, stack trace capture, and automatic bugcheck logging to DEF-DEV.
+  - Styled crash screens for testing and clearer separation from real OS bugchecks.
+
+- Documentation System (v2.2+)
+  - Full in-app documentation with multiple guide pages: Getting Started, Core Apps, Facility Apps, Terminal commands, Advanced Features, Shortcuts, Troubleshooting, and more.
+  - Multi-version changelog viewer and improved navigation across docs.
+
+- Recovery, BIOS, and Installer Improvements (v2.1)
+  - Modernized BIOS/UEFI interface, recovery mode with consistent theming, reboot options (including BIOS and Recovery shortcuts), and a proper app installer.
+  - File Reader gained editing features and better integration with "Open with" workflows.
+
+- Foundation & Architecture (Since v2.0)
+  - Complete rewrite to a modern stack: React + TypeScript + Tailwind CSS, Vite build system, and a component-driven architecture for performance and maintainability.
+
+--- Other notable improvements
+- Admin tooling and command queue (maintenance, safe mode, logout, and package helpers).
+- Diagnostics and system health monitoring pages.
+- Visual and UX polish across windows, taskbar, start menu, and animations.
+- Ongoing bug fixes and quality-of-life updates (username display in Start Menu, copyright year, consistent versioning).
+
+## Where to find the full changelog
+The full changelog can be found in the site!
+Thank you for checking out Urbanshade OS - A *"passion project"*! contributors and community involvement are welcome!
+
+
 ## How to setup localy:
 
 1. Download this repo
