@@ -1,6 +1,5 @@
-import { ArrowLeft, Terminal, Rocket, Folder, Map, Keyboard, HelpCircle, Zap, Waves, Shield, Bug } from "lucide-react";
+import { ArrowLeft, Terminal, Rocket, Folder, Map, Keyboard, HelpCircle, Zap, Waves, Shield, Bug, BookOpen, Cpu, Package } from "lucide-react";
 import { Link } from "react-router-dom";
-import { BookOpen, Terminal, Shield, Cpu, Map, ArrowLeft, Keyboard, HelpCircle, Bug, Zap, Package } from "lucide-react";
 import { DocSearch } from "@/components/DocSearch";
 
 const docSections = [
