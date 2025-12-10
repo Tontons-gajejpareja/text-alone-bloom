@@ -25,8 +25,8 @@ I cant be thankful enough for simply my friends supporting this. And especially,
 
 
 Online/offline:
-### CURRENTLY OFFLINE, MOVING TO GIT ON aswdbatch.github.io
-For now: `urbanshade.lovable.dev`
+### CURRENTLY ONLINE!
+`urbanshade.lovable.dev`
 
 Update cycle: every 2nd week on Friday - Sunday we push an update (hopefully)
 
