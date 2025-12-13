@@ -1,3 +1,8 @@
+completely unrelated:
+Just beat Nine Circles in gd
+les go
+---
+
 # Welcome to the Urbanshade OS (website)!
 ---
 ## I am extemely, EXTREMELY PROUD to announce this...
