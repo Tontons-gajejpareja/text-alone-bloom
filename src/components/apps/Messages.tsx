@@ -350,8 +350,19 @@ export const Messages = () => {
                   
                   {showUserPicker && (
                     <div className="mt-2 p-2 rounded-lg border border-border bg-card max-h-48 overflow-y-auto">
-                      {users.length === 0 ? (
-                        <div className="p-2 text-sm text-muted-foreground">No other users found</div>
+                      {isLoading ? (
+                        <div className="p-2 text-sm text-muted-foreground flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Loading users...
+                        </div>
+                      ) : users.length === 0 ? (
+                        <div className="p-3 text-center">
+                          <Users className="w-6 h-6 mx-auto mb-2 text-muted-foreground/50" />
+                          <p className="text-sm text-muted-foreground">No other users found yet</p>
+                          <p className="text-xs text-muted-foreground/70 mt-1">
+                            Be the first to invite friends!
+                          </p>
+                        </div>
                       ) : (
                         users.map(u => (
                           <div

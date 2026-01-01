@@ -244,6 +244,17 @@ export const DisclaimerScreen = ({ onAccept }: DisclaimerScreenProps) => {
               </a>
             </span>
           </div>
+
+          {/* Legal Links */}
+          <div className="flex justify-center gap-6 text-xs text-muted-foreground/70 animate-fade-in" style={{ animationDelay: "550ms" }}>
+            <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-400 transition-colors">
+              Terms of Service
+            </a>
+            <span>•</span>
+            <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-cyan-400 transition-colors">
+              Privacy Policy
+            </a>
+          </div>
         </div>
 
         {/* Acceptance Section */}
