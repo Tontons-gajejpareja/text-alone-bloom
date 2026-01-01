@@ -29,6 +29,8 @@ import Features from "./pages/docs/Features";
 import NotFound from "./pages/NotFound";
 import ModerationPanel from "./pages/ModerationPanel";
 import StatusPage from "./pages/Status";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 // Account Manager pages
 import AccManageLayout from "./pages/acc-manage/Layout";
@@ -90,6 +92,10 @@ const App = () => (
         
         {/* Status Page */}
         <Route path="/status" element={<StatusPage />} />
+        
+        {/* Legal Pages */}
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
         
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
