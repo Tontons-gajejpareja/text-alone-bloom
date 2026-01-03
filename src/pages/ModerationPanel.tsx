@@ -7,7 +7,7 @@ import {
   Settings, Database, Wifi, Globe, Server, ChevronDown, ChevronRight,
   TriangleAlert, ShieldAlert, ShieldCheck, Filter, Download, Trash2,
   MessageSquare, Bell, Volume2, VolumeX, Cpu, HardDrive, Crown, Megaphone,
-  UserCog, Send
+  UserCog, Send, Star, Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,7 @@ interface UserData {
   warnings: Array<{ reason: string; created_at: string }>;
   created_at: string;
   lastActive?: string;
+  isVip?: boolean;
 }
 
 interface StatusEntry {
@@ -83,6 +84,7 @@ const DEMO_USERS: UserData[] = [
     warningsCount: 0,
     warnings: [],
     created_at: new Date().toISOString(),
+    isVip: false,
   },
   {
     id: "demo-2",
@@ -104,6 +106,7 @@ const DEMO_USERS: UserData[] = [
       { reason: "Demo warning 2", created_at: new Date().toISOString() },
     ],
     created_at: new Date(Date.now() - 86400000 * 7).toISOString(),
+    isVip: false,
   },
   {
     id: "demo-3",
@@ -116,6 +119,7 @@ const DEMO_USERS: UserData[] = [
     warningsCount: 1,
     warnings: [{ reason: "Demo warning", created_at: new Date().toISOString() }],
     created_at: new Date(Date.now() - 86400000 * 3).toISOString(),
+    isVip: false,
   },
   {
     id: "demo-4",
@@ -128,6 +132,20 @@ const DEMO_USERS: UserData[] = [
     warningsCount: 0,
     warnings: [],
     created_at: new Date(Date.now() - 86400000 * 30).toISOString(),
+    isVip: false,
+  },
+  {
+    id: "demo-5",
+    user_id: "demo-user-5",
+    username: "DemoVIP",
+    display_name: "Demo VIP User",
+    role: "user",
+    clearance: 3,
+    isBanned: false,
+    warningsCount: 0,
+    warnings: [],
+    created_at: new Date(Date.now() - 86400000 * 14).toISOString(),
+    isVip: true,
   },
 ];
 
@@ -227,7 +245,7 @@ const StatusCard = ({ status, onUpdate }: { status: StatusEntry; onUpdate: (id: 
 };
 
 // User details panel
-const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop, isDemo }: { 
+const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop, onVip, onRevokeVip, isDemo }: { 
   user: UserData; 
   onClose: () => void;
   onWarn: () => void;
@@ -235,9 +253,11 @@ const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop,
   onUnban: () => void;
   onOp: () => void;
   onDeop: () => void;
+  onVip: () => void;
+  onRevokeVip: () => void;
   isDemo: boolean;
 }) => {
-  const rank = user.personnelRank || (user.role === 'admin' ? 'Admin' : 'Staff');
+  const rank = user.personnelRank || (user.role === 'admin' ? 'Admin' : user.isVip ? 'VIP' : 'Staff');
   
   return (
     <div className="fixed inset-y-0 right-0 w-96 bg-slate-950 border-l-2 border-cyan-500/30 shadow-2xl shadow-cyan-500/10 z-50 flex flex-col">
@@ -278,6 +298,11 @@ const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop,
         <div className="space-y-4">
           {/* Status badges */}
           <div className="flex flex-wrap gap-2">
+            {user.isVip && (
+              <span className="px-2 py-1 rounded bg-purple-500/20 text-purple-400 text-xs font-mono flex items-center gap-1 border border-purple-500/30">
+                <Star className="w-3 h-3" /> VIP
+              </span>
+            )}
             {user.isBanned && (
               <span className="px-2 py-1 rounded bg-red-500/20 text-red-400 text-xs font-mono flex items-center gap-1 border border-red-500/30">
                 <Ban className="w-3 h-3" /> BANNED
@@ -368,6 +393,23 @@ const UserDetailsPanel = ({ user, onClose, onWarn, onBan, onUnban, onOp, onDeop,
               )}
             </div>
             
+            {/* VIP Button */}
+            {!user.isVip ? (
+              <Button 
+                onClick={onVip}
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 gap-2"
+              >
+                <Star className="w-4 h-4" /> Grant VIP Status
+              </Button>
+            ) : (
+              <Button 
+                onClick={onRevokeVip}
+                className="w-full bg-slate-600 hover:bg-slate-500 gap-2"
+              >
+                <Star className="w-4 h-4" /> Revoke VIP Status
+              </Button>
+            )}
+            
             {/* OP Button */}
             <Button 
               onClick={onOp}
@@ -454,6 +496,7 @@ const ModerationPanel = () => {
   const [showLockdownDialog, setShowLockdownDialog] = useState(false);
   const [showOpDialog, setShowOpDialog] = useState(false);
   const [showBroadcastDialog, setShowBroadcastDialog] = useState(false);
+  const [showVipDialog, setShowVipDialog] = useState(false);
   const [warnReason, setWarnReason] = useState("");
   const [banReason, setBanReason] = useState("");
   const [banDuration, setBanDuration] = useState<"1h" | "24h" | "7d" | "30d" | "perm">("24h");
@@ -877,6 +920,58 @@ const ModerationPanel = () => {
       timestamp: new Date()
     }, ...prev]);
     setShowUserDetails(false);
+  };
+
+  // Handle VIP grant
+  const handleVip = async () => {
+    if (!selectedUser) return;
+    
+    if (isDemoMode) {
+      const updatedUsers = users.map(u => 
+        u.id === selectedUser.id ? { ...u, isVip: true } : u
+      );
+      setUsers(updatedUsers);
+      toast.success(`[DEMO] VIP status granted to ${selectedUser.username}`);
+      setActivities(prev => [{
+        id: Date.now().toString(),
+        type: "op",
+        user: selectedUser.username,
+        message: `[DEMO] ⭐ VIP granted to @${selectedUser.username}`,
+        timestamp: new Date()
+      }, ...prev]);
+      setShowVipDialog(false);
+      setShowUserDetails(false);
+      return;
+    }
+    
+    // TODO: Real implementation via edge function
+    toast.info("VIP functionality requires cloud implementation - see pending.md");
+    setShowVipDialog(false);
+  };
+
+  // Handle VIP revoke
+  const handleRevokeVip = () => {
+    if (!selectedUser) return;
+    
+    if (isDemoMode) {
+      const updatedUsers = users.map(u => 
+        u.id === selectedUser.id ? { ...u, isVip: false } : u
+      );
+      setUsers(updatedUsers);
+      toast.success(`[DEMO] VIP status revoked from ${selectedUser.username}`);
+      setActivities(prev => [{
+        id: Date.now().toString(),
+        type: "system",
+        user: selectedUser.username,
+        message: `[DEMO] VIP revoked: @${selectedUser.username}`,
+        timestamp: new Date()
+      }, ...prev]);
+      setShowUserDetails(false);
+      return;
+    }
+    
+    // TODO: Real implementation via edge function
+    toast.info("VIP functionality requires cloud implementation - see pending.md");
   };
 
 
@@ -1331,6 +1426,8 @@ const ModerationPanel = () => {
           onUnban={() => isDemoMode ? handleDemoUnban(selectedUser.user_id) : handleUnban(selectedUser.user_id)}
           onOp={() => setShowOpDialog(true)}
           onDeop={handleDemoDeop}
+          onVip={() => setShowVipDialog(true)}
+          onRevokeVip={handleRevokeVip}
           isDemo={isDemoMode}
         />
       )}
@@ -1598,6 +1695,50 @@ const ModerationPanel = () => {
             <Button variant="outline" onClick={() => setShowBroadcastDialog(false)} className="border-slate-700">Cancel</Button>
             <Button onClick={handleBroadcast} className="bg-cyan-600 hover:bg-cyan-500 gap-2">
               <Send className="w-4 h-4" /> {isDemoMode && '[DEMO] '}Broadcast
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* VIP Grant Dialog */}
+      <Dialog open={showVipDialog} onOpenChange={setShowVipDialog}>
+        <DialogContent className="bg-slate-950 border-purple-500/50">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-purple-400 font-mono">
+              <Star className="w-5 h-5" />
+              GRANT VIP STATUS
+            </DialogTitle>
+            <DialogDescription className="font-mono text-slate-400">
+              Grant VIP privileges to {selectedUser?.username}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="p-4 rounded-lg bg-gradient-to-r from-purple-500/10 to-pink-500/10 border border-purple-500/30">
+              <h4 className="font-bold text-purple-400 mb-2 flex items-center gap-2">
+                <Sparkles className="w-4 h-4" /> VIP Benefits
+              </h4>
+              <ul className="text-sm text-slate-300 space-y-1 font-mono">
+                <li>• Cloud priority processing</li>
+                <li>• VIP badge next to name</li>
+                <li>• Skip advanced check when messaging Aswd</li>
+                <li>• Overall priority in queues</li>
+              </ul>
+            </div>
+
+            {isDemoMode && (
+              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                <p className="text-xs text-amber-400 font-mono flex items-center gap-2">
+                  <Eye className="w-3 h-3" /> DEMO MODE: This action won't affect the cloud
+                </p>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowVipDialog(false)} className="border-slate-700">Cancel</Button>
+            <Button onClick={handleVip} className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 gap-2">
+              <Star className="w-4 h-4" /> {isDemoMode && '[DEMO] '}Grant VIP
             </Button>
           </DialogFooter>
         </DialogContent>

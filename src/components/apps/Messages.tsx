@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Mail, Star, Trash2, AlertTriangle, Send, X, Users, RefreshCw, Cloud, LogIn, Loader2, Clock, Crown, Shield } from "lucide-react";
+import { Mail, Star, Trash2, AlertTriangle, Send, X, Users, RefreshCw, Cloud, LogIn, Loader2, Clock, Crown, Shield, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,8 +9,8 @@ import { useMessages, Message } from "@/hooks/useMessages";
 import { useOnlineAccount } from "@/hooks/useOnlineAccount";
 import { supabase } from "@/integrations/supabase/client";
 
-// Badge component for Admin/Creator
-const UserBadge = ({ username, role }: { username: string; role?: string }) => {
+// Badge component for Admin/Creator/VIP
+const UserBadge = ({ username, role, isVip }: { username: string; role?: string; isVip?: boolean }) => {
   const isCreator = username.toLowerCase() === 'aswd';
   const isAdmin = role === 'admin';
   
@@ -28,6 +28,15 @@ const UserBadge = ({ username, role }: { username: string; role?: string }) => {
       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30 ml-1">
         <Shield className="w-3 h-3" />
         Admin
+      </span>
+    );
+  }
+  
+  if (isVip) {
+    return (
+      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30 ml-1">
+        <Sparkles className="w-3 h-3" />
+        VIP
       </span>
     );
   }
@@ -63,6 +72,7 @@ export const Messages = () => {
   const [showUserPicker, setShowUserPicker] = useState(false);
   const [showRateLimitDialog, setShowRateLimitDialog] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [showAswdPopup, setShowAswdPopup] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [starredLocal, setStarredLocal] = useState<Set<string>>(new Set());
 
@@ -134,6 +144,11 @@ export const Messages = () => {
   const selectRecipient = (userId: string, username: string) => {
     setCompose(prev => ({ ...prev, to: username, toUserId: userId }));
     setShowUserPicker(false);
+    
+    // Show popup when selecting Aswd
+    if (username.toLowerCase() === 'aswd') {
+      setShowAswdPopup(true);
+    }
   };
 
   const handleSendMessage = async () => {
@@ -240,6 +255,36 @@ export const Messages = () => {
           </div>
           <DialogFooter>
             <Button onClick={() => setShowRateLimitDialog(false)}>Understood</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Aswd (Creator) Popup */}
+      <Dialog open={showAswdPopup} onOpenChange={setShowAswdPopup}>
+        <DialogContent className="bg-gradient-to-br from-background to-yellow-950/20 border-yellow-500/30">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-yellow-400">
+              <Crown className="w-5 h-5" />
+              You're messaging the Creator!
+            </DialogTitle>
+            <DialogDescription>
+              You've selected Aswd, the creator and developer of UrbanShade OS.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+            <div className="text-sm space-y-2">
+              <p className="text-foreground">
+                <strong className="text-yellow-400">Hey there! 👋</strong> Thanks for reaching out to the creator.
+              </p>
+              <p className="text-muted-foreground text-xs">
+                Aswd personally reads every message (when he can). Be nice, be clear, and he'll get back to you when possible!
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowAswdPopup(false)} className="bg-yellow-600 hover:bg-yellow-500">
+              Got it, let's compose!
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -508,14 +553,30 @@ export const Messages = () => {
             </div>
 
             <div className="flex-1 p-6 overflow-y-auto">
-              {/* Admin/Creator Verification Banner */}
-              {(selected.sender_profile?.role === 'admin' || selected.sender_profile?.username?.toLowerCase() === 'aswd') && (
+              {/* Admin/Creator/VIP Verification Banner */}
+              {selected.sender_profile?.username?.toLowerCase() === 'aswd' && (
+                <div className="mb-4 px-3 py-2 rounded-lg bg-gradient-to-r from-yellow-500/20 to-amber-500/20 border border-yellow-500/40 flex items-center gap-2">
+                  <Crown className="w-4 h-4 text-yellow-400" />
+                  <span className="text-xs text-yellow-400 font-medium">
+                    Verified Creator • This is Aswd, the developer of UrbanShade OS. Say hi!
+                  </span>
+                </div>
+              )}
+              
+              {selected.sender_profile?.role === 'admin' && selected.sender_profile?.username?.toLowerCase() !== 'aswd' && (
                 <div className="mb-4 px-3 py-2 rounded-lg bg-green-500/15 border border-green-500/30 flex items-center gap-2">
                   <Shield className="w-4 h-4 text-green-400" />
                   <span className="text-xs text-green-400 font-medium">
-                    {selected.sender_profile?.username?.toLowerCase() === 'aswd' 
-                      ? 'Verified Creator • This is the developer of UrbanShade OS'
-                      : 'Verified Admin • Messages from this user are legitimate'}
+                    Verified Admin • This user is part of the UrbanShade team
+                  </span>
+                </div>
+              )}
+              
+              {selected.sender_profile?.is_vip && selected.sender_profile?.role !== 'admin' && selected.sender_profile?.username?.toLowerCase() !== 'aswd' && (
+                <div className="mb-4 px-3 py-2 rounded-lg bg-purple-500/15 border border-purple-500/30 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-purple-400" />
+                  <span className="text-xs text-purple-400 font-medium">
+                    Trusted VIP • This user has been recognized by Aswd and is trustworthy
                   </span>
                 </div>
               )}
