@@ -15,6 +15,7 @@ export interface Message {
     username: string;
     display_name: string | null;
     role?: string;
+    is_vip?: boolean;
   };
 }
 
@@ -53,7 +54,7 @@ export const useMessages = () => {
 
       // Fetch sender profiles for each message
       const senderIds = [...new Set(receivedMessages?.map(m => m.sender_id) || [])];
-      let profiles: Record<string, { username: string; display_name: string | null; role?: string }> = {};
+      let profiles: Record<string, { username: string; display_name: string | null; role?: string; is_vip?: boolean }> = {};
       
       if (senderIds.length > 0) {
         const { data: profilesData } = await supabase
@@ -62,7 +63,8 @@ export const useMessages = () => {
           .in('user_id', senderIds);
         
         profilesData?.forEach(p => {
-          profiles[p.user_id] = { username: p.username, display_name: p.display_name, role: p.role };
+          // TODO: Fetch VIP status from vips table when implemented
+          profiles[p.user_id] = { username: p.username, display_name: p.display_name, role: p.role, is_vip: false };
         });
       }
 

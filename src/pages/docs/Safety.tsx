@@ -1,4 +1,4 @@
-import { ArrowLeft, Shield, AlertTriangle, Crown, Eye, Ban, Users, MessageSquare, CheckCircle, XCircle, Flag } from "lucide-react";
+import { ArrowLeft, Shield, AlertTriangle, Crown, Eye, Ban, Users, MessageSquare, CheckCircle, XCircle, Flag, Star, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Safety = () => {
@@ -68,6 +68,23 @@ const Safety = () => {
                   Admins are trusted members who help maintain UrbanShade. They can moderate content, 
                   help users, and keep things running smoothly. When chatting with an admin, 
                   you'll also see a verification popup confirming they're legit.
+                </p>
+              </div>
+
+              {/* VIP Badge */}
+              <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-sm font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                    <Sparkles className="w-4 h-4" />
+                    VIP
+                  </span>
+                  <span className="font-bold text-purple-400">Trusted by Aswd</span>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  VIPs are users who have been personally recognized by Aswd. They're trustworthy people 
+                  who've earned special status. VIPs get perks like cloud priority, skipping message checks 
+                  when contacting Aswd, and an awesome purple badge. If someone has this badge, 
+                  you can trust they're cool!
                 </p>
               </div>
 
