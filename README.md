@@ -1,6 +1,3 @@
-Im trying to make git page work. I will add anumber here for attempts...
-1
-
 ## Urbanshade OS reaches 300 commits!
 While this may not seem like a big thing, it is big for me!
 
@@ -15,7 +12,7 @@ Online/offline:
 ### CURRENTLY ONLINE!
 `urbanshade.lovable.dev`
 
-Update cycle: every 2nd week on Friday - Sunday we push an update. (hopefully)
+Update cycle: every 2nd week on Friday - Sunday we push an update (hopefully)
 
 ---
 ## What is this in the first place?
