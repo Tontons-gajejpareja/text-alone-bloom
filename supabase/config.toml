@@ -2,3 +2,6 @@ project_id = "oukxkpihsyikamzldiek"
 
 [functions.admin-actions]
 verify_jwt = false
+
+[functions.navi-autonomous]
+verify_jwt = false

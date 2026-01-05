@@ -164,6 +164,45 @@ export type Database = {
         }
         Relationships: []
       }
+      navi_auto_actions: {
+        Row: {
+          action_type: string
+          created_at: string | null
+          id: string
+          reason: string
+          reversed: boolean | null
+          reversed_at: string | null
+          reversed_by: string | null
+          target_user_id: string | null
+          threat_level: string | null
+          trigger_stats: Json | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string | null
+          id?: string
+          reason: string
+          reversed?: boolean | null
+          reversed_at?: string | null
+          reversed_by?: string | null
+          target_user_id?: string | null
+          threat_level?: string | null
+          trigger_stats?: Json | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string | null
+          id?: string
+          reason?: string
+          reversed?: boolean | null
+          reversed_at?: string | null
+          reversed_by?: string | null
+          target_user_id?: string | null
+          threat_level?: string | null
+          trigger_stats?: Json | null
+        }
+        Relationships: []
+      }
       navi_messages: {
         Row: {
           created_at: string | null
@@ -188,6 +227,129 @@ export type Database = {
           priority?: string | null
           sent_by?: string | null
           target_audience?: string | null
+        }
+        Relationships: []
+      }
+      navi_settings: {
+        Row: {
+          adaptive_thresholds_enabled: boolean | null
+          auto_disable_signups: boolean | null
+          auto_lockdown_enabled: boolean | null
+          auto_read_only_mode: boolean | null
+          auto_temp_ban_enabled: boolean | null
+          auto_vip_only_mode: boolean | null
+          auto_warn_enabled: boolean | null
+          degraded_service_messages_enabled: boolean | null
+          disable_messages: boolean | null
+          disable_signups: boolean | null
+          failed_login_rolling_avg: number | null
+          failed_login_threshold: number | null
+          id: string
+          last_threshold_adjustment: string | null
+          lockdown_mode: boolean | null
+          lockdown_multiplier: number | null
+          maintenance_message: string | null
+          maintenance_mode: boolean | null
+          message_rolling_avg: number | null
+          message_threshold: number | null
+          push_critical_enabled: boolean | null
+          push_recovery_enabled: boolean | null
+          push_warning_enabled: boolean | null
+          read_only_mode: boolean | null
+          signup_rolling_avg: number | null
+          signup_threshold: number | null
+          updated_at: string | null
+          updated_by: string | null
+          vip_only_mode: boolean | null
+          warning_messages_enabled: boolean | null
+          welcome_messages_enabled: boolean | null
+        }
+        Insert: {
+          adaptive_thresholds_enabled?: boolean | null
+          auto_disable_signups?: boolean | null
+          auto_lockdown_enabled?: boolean | null
+          auto_read_only_mode?: boolean | null
+          auto_temp_ban_enabled?: boolean | null
+          auto_vip_only_mode?: boolean | null
+          auto_warn_enabled?: boolean | null
+          degraded_service_messages_enabled?: boolean | null
+          disable_messages?: boolean | null
+          disable_signups?: boolean | null
+          failed_login_rolling_avg?: number | null
+          failed_login_threshold?: number | null
+          id?: string
+          last_threshold_adjustment?: string | null
+          lockdown_mode?: boolean | null
+          lockdown_multiplier?: number | null
+          maintenance_message?: string | null
+          maintenance_mode?: boolean | null
+          message_rolling_avg?: number | null
+          message_threshold?: number | null
+          push_critical_enabled?: boolean | null
+          push_recovery_enabled?: boolean | null
+          push_warning_enabled?: boolean | null
+          read_only_mode?: boolean | null
+          signup_rolling_avg?: number | null
+          signup_threshold?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+          vip_only_mode?: boolean | null
+          warning_messages_enabled?: boolean | null
+          welcome_messages_enabled?: boolean | null
+        }
+        Update: {
+          adaptive_thresholds_enabled?: boolean | null
+          auto_disable_signups?: boolean | null
+          auto_lockdown_enabled?: boolean | null
+          auto_read_only_mode?: boolean | null
+          auto_temp_ban_enabled?: boolean | null
+          auto_vip_only_mode?: boolean | null
+          auto_warn_enabled?: boolean | null
+          degraded_service_messages_enabled?: boolean | null
+          disable_messages?: boolean | null
+          disable_signups?: boolean | null
+          failed_login_rolling_avg?: number | null
+          failed_login_threshold?: number | null
+          id?: string
+          last_threshold_adjustment?: string | null
+          lockdown_mode?: boolean | null
+          lockdown_multiplier?: number | null
+          maintenance_message?: string | null
+          maintenance_mode?: boolean | null
+          message_rolling_avg?: number | null
+          message_threshold?: number | null
+          push_critical_enabled?: boolean | null
+          push_recovery_enabled?: boolean | null
+          push_warning_enabled?: boolean | null
+          read_only_mode?: boolean | null
+          signup_rolling_avg?: number | null
+          signup_threshold?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+          vip_only_mode?: boolean | null
+          warning_messages_enabled?: boolean | null
+          welcome_messages_enabled?: boolean | null
+        }
+        Relationships: []
+      }
+      navi_threshold_history: {
+        Row: {
+          id: string
+          metric_type: string
+          recorded_at: string | null
+          value: number
+        }
+        Insert: {
+          id?: string
+          metric_type: string
+          recorded_at?: string | null
+          value: number
+        }
+        Update: {
+          id?: string
+          metric_type?: string
+          recorded_at?: string | null
+          value?: number
         }
         Relationships: []
       }
@@ -311,6 +473,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_first_login: {
+        Row: {
+          created_at: string | null
+          user_id: string
+          welcomed: boolean | null
+          welcomed_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          user_id: string
+          welcomed?: boolean | null
+          welcomed_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          user_id?: string
+          welcomed?: boolean | null
+          welcomed_at?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           granted_at: string | null
@@ -403,6 +586,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      adjust_navi_thresholds: { Args: never; Returns: undefined }
       check_and_send_message: {
         Args: {
           p_body: string
@@ -424,6 +608,7 @@ export type Database = {
         Returns: boolean
       }
       is_vip: { Args: { _user_id: string }; Returns: boolean }
+      record_navi_metrics: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
