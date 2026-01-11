@@ -34,8 +34,32 @@ export const ChangelogDialog = () => {
       icon: <Rocket className="w-5 h-5" />,
       color: "from-rose-500 to-orange-600",
       tagline: "THE YEAR UPDATE",
-      overview: "The biggest update yet! Creator role with golden styling, NAVI AI for moderation chat, cloud login in Account Manager, NAVI autonomous threat detection, dedicated StatusPage, and the new Support Center.",
+      overview: "The biggest update yet! Containment Breach horror game, redesigned App Store matching Plugin Store style, improved login screen, window snapping fixes, and much more.",
       sections: {
+        "Containment Breach Game": [
+          "NEW: FNAF-style horror game in the App Store",
+          "Survive 5 nights monitoring escaped memetic hazards",
+          "Camera system with periodic ping sweeps",
+          "Audio lures, containment shocks, and door blocks",
+          "8 unique subjects with Z-## designations and special abilities",
+          "Memetic visual effects - screen distortion, fake signals",
+          "Unlockable lore documents after each night",
+          "Power management and breach warning system"
+        ],
+        "App Store Redesign": [
+          "NEW: Visual overhaul matching Plugin Store aesthetic",
+          "Gradient backgrounds with category-colored icons",
+          "Improved card layout with better spacing",
+          "Cyan accent color scheme for install buttons",
+          "Featured apps section with compact cards",
+          "Streamlined Browse/Installed tabs"
+        ],
+        "UI Improvements": [
+          "Fixed window snapping to work with top taskbar layout",
+          "Snap zones now properly avoid taskbar and bottom UI",
+          "Login screen with improved visual hierarchy",
+          "Desktop maintains clean modern aesthetic"
+        ],
         "NAVI AI": [
           "NEW: AI-powered assistant in moderation #chat channel",
           "Query with @NAVI for real-time system insights",
