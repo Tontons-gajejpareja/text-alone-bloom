@@ -1,21 +1,24 @@
-import { useState, useRef, useEffect } from "react";
-import { Settings as SettingsIcon, Monitor, Wifi, Volume2, HardDrive, Users, Clock, Shield, Palette, Accessibility, Bell, Power, Globe, Search, Upload, UserPlus, AlertTriangle, Download, ChevronDown, Code, FileText, Type, Cloud, RefreshCw, LogOut, LogIn, Trash2, Loader2 } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { useState, useRef } from "react";
+import { 
+  Settings as SettingsIcon, Monitor, Wifi, Volume2, HardDrive, Users, Clock, 
+  Shield, Palette, Accessibility, Bell, Power, Search, Upload, 
+  AlertTriangle, Download, ChevronRight, Code, Cloud, RefreshCw, 
+  LogOut, Loader2, Zap, Moon, Sun, Eye, Lock, Database, Globe, 
+  Smartphone, ChevronDown, Check, X
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { saveState, loadState } from "@/lib/persistence";
 import { toast } from "sonner";
 import { useSystemSettings } from "@/hooks/useSystemSettings";
 import { useOnlineAccount } from "@/hooks/useOnlineAccount";
 import { useAutoSync } from "@/hooks/useAutoSync";
-import { SyncSettingsPanel } from "@/components/SyncSettingsPanel";
-import { SyncConflictDialog } from "@/components/SyncConflictDialog";
 
 export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
   const { settings, updateSetting, resetToDefaults } = useSystemSettings();
@@ -25,11 +28,8 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
   const [selectedCategory, setSelectedCategory] = useState("system");
   const [searchQuery, setSearchQuery] = useState("");
   const [showFactoryResetDialog, setShowFactoryResetDialog] = useState(false);
-  const [showConflictDialog, setShowConflictDialog] = useState(false);
-  const [showAddAccountDialog, setShowAddAccountDialog] = useState(false);
-  const [showSignOutDialog, setShowSignOutDialog] = useState(false);
-  const [newAccountUsername, setNewAccountUsername] = useState("");
-  const [newAccountPassword, setNewAccountPassword] = useState("");
+  const [showOemDialog, setShowOemDialog] = useState(false);
+  const [developerOptionsOpen, setDeveloperOptionsOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // System settings
@@ -37,14 +37,8 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
   const [telemetry, setTelemetry] = useState(loadState("settings_telemetry", false));
   const [powerMode, setPowerMode] = useState(loadState("settings_power_mode", "balanced"));
   const [oemUnlocked, setOemUnlocked] = useState(loadState("settings_oem_unlocked", false));
-  const [showOemDialog, setShowOemDialog] = useState(false);
-  const [developerOptionsOpen, setDeveloperOptionsOpen] = useState(false);
   const [developerMode, setDeveloperMode] = useState(loadState("settings_developer_mode", false));
   const [usbDebugging, setUsbDebugging] = useState(loadState("settings_usb_debugging", false));
-  const [showTouches, setShowTouches] = useState(loadState("settings_show_touches", false));
-  const [stayAwake, setStayAwake] = useState(loadState("settings_stay_awake", false));
-  const [strictMode, setStrictMode] = useState(loadState("settings_strict_mode", false));
-  const [gpuRendering, setGpuRendering] = useState(loadState("settings_gpu_rendering", false));
   
   // Display settings
   const [resolution, setResolution] = useState(loadState("settings_resolution", "1920x1080"));
@@ -54,48 +48,31 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
   // Network settings
   const [wifiEnabled, setWifiEnabled] = useState(loadState("settings_wifi", true));
   const [vpnEnabled, setVpnEnabled] = useState(loadState("settings_vpn", false));
-  const [proxyEnabled, setProxyEnabled] = useState(loadState("settings_proxy", false));
   
   // Sound settings
   const [volume, setVolume] = useState(loadState("settings_volume", [70]));
   const [muteEnabled, setMuteEnabled] = useState(loadState("settings_mute", false));
   const [soundEffects, setSoundEffects] = useState(loadState("settings_sound_effects", true));
   
-  // Time & Language
-  const [timeZone, setTimeZone] = useState(loadState("settings_timezone", "UTC-5"));
-  const [language, setLanguage] = useState(loadState("settings_language", "English"));
-  const [dateFormat, setDateFormat] = useState(loadState("settings_date_format", "MM/DD/YYYY"));
-  
-  // Privacy
-  const [locationTracking, setLocationTracking] = useState(loadState("settings_location", false));
-  const [crashReports, setCrashReports] = useState(loadState("settings_crash_reports", true));
-  
   // Notifications
   const [notificationsEnabled, setNotificationsEnabled] = useState(loadState("settings_notifications", true));
   const [doNotDisturb, setDoNotDisturb] = useState(loadState("settings_dnd", false));
-  const [notificationSound, setNotificationSound] = useState(loadState("settings_notification_sound", true));
 
   const handleSave = (key: string, value: any) => {
     saveState(key, value);
   };
 
   const handleFactoryReset = () => {
-    // Clear all localStorage
     localStorage.clear();
     toast.success("Factory reset initiated. Reloading system...");
-    // Reload the page to restart the setup process
-    setTimeout(() => {
-      window.location.reload();
-    }, 1500);
+    setTimeout(() => window.location.reload(), 1500);
   };
 
-  const handleOemUnlockToggle = (checked: boolean) => {
-    // Both turning on and off require factory reset
+  const handleOemUnlockToggle = () => {
     setShowOemDialog(true);
   };
 
   const handleOemUnlockConfirm = () => {
-    // Toggle OEM unlock and factory reset
     const newValue = !oemUnlocked;
     setOemUnlocked(newValue);
     handleSave("settings_oem_unlocked", newValue);
@@ -104,13 +81,10 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
   };
 
   const handleExportSystemImage = () => {
-    // Export all localStorage to a JSON file
     const systemImage: Record<string, string> = {};
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key) {
-        systemImage[key] = localStorage.getItem(key) || "";
-      }
+      if (key) systemImage[key] = localStorage.getItem(key) || "";
     }
     
     const blob = new Blob([JSON.stringify(systemImage, null, 2)], { type: 'application/json' });
@@ -133,1637 +107,464 @@ export const Settings = ({ onUpdate }: { onUpdate?: () => void }) => {
     reader.onload = (e) => {
       try {
         const systemImage = JSON.parse(e.target?.result as string);
-        // Clear current localStorage
         localStorage.clear();
-        // Import all keys
-        Object.keys(systemImage).forEach(key => {
-          localStorage.setItem(key, systemImage[key]);
-        });
+        Object.keys(systemImage).forEach(key => localStorage.setItem(key, systemImage[key]));
         toast.success("System image imported successfully. Reloading...");
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
-      } catch (error) {
+        setTimeout(() => window.location.reload(), 1500);
+      } catch {
         toast.error("Failed to import system image. Invalid file format.");
       }
     };
     reader.readAsText(file);
   };
 
-  const handleAddAccount = () => {
-    if (!newAccountUsername || !newAccountPassword) {
-      toast.error("Please enter both username and password");
-      return;
-    }
-
-    // Get existing accounts
-    const accounts = loadState("accounts", []);
-    
-    // Check if username already exists
-    if (accounts.some((acc: any) => acc.username === newAccountUsername)) {
-      toast.error("Username already exists");
-      return;
-    }
-
-    // Add new account
-    const newAccount = {
-      id: `P${String(accounts.length + 1).padStart(3, '0')}`,
-      username: newAccountUsername,
-      password: newAccountPassword,
-      name: newAccountUsername,
-      role: "User",
-      clearance: 2,
-      department: "General",
-      location: "Facility",
-      status: "active",
-      phone: `x${2000 + accounts.length}`,
-      email: `${newAccountUsername}@urbanshade.corp`,
-      createdAt: new Date().toISOString()
-    };
-
-    accounts.push(newAccount);
-    saveState("accounts", accounts);
-    
-    toast.success(`Account created for ${newAccountUsername}`);
-    setShowAddAccountDialog(false);
-    setNewAccountUsername("");
-    setNewAccountPassword("");
-  };
-
   const categories = [
-    { id: "system", name: "System", icon: <Monitor className="w-5 h-5" /> },
-    { id: "display", name: "Display", icon: <Palette className="w-5 h-5" /> },
-    { id: "network", name: "Network & Internet", icon: <Wifi className="w-5 h-5" /> },
-    { id: "sound", name: "Sound", icon: <Volume2 className="w-5 h-5" /> },
-    { id: "storage", name: "Storage", icon: <HardDrive className="w-5 h-5" /> },
-    { id: "accounts", name: "Accounts", icon: <Users className="w-5 h-5" /> },
-    { id: "time", name: "Time & Language", icon: <Clock className="w-5 h-5" /> },
-    { id: "privacy", name: "Privacy & Security", icon: <Shield className="w-5 h-5" /> },
-    { id: "accessibility", name: "Accessibility", icon: <Accessibility className="w-5 h-5" /> },
-    { id: "notifications", name: "Notifications", icon: <Bell className="w-5 h-5" /> },
-    { id: "power", name: "Power & Battery", icon: <Power className="w-5 h-5" /> },
-    { id: "about", name: "About Urbanshade OS", icon: <SettingsIcon className="w-5 h-5" /> },
+    { id: "system", name: "System", icon: Monitor, description: "Device info, updates" },
+    { id: "display", name: "Display", icon: Palette, description: "Theme, resolution" },
+    { id: "network", name: "Network", icon: Wifi, description: "Wi-Fi, VPN" },
+    { id: "sound", name: "Sound", icon: Volume2, description: "Volume, effects" },
+    { id: "storage", name: "Storage", icon: HardDrive, description: "Disk usage" },
+    { id: "accounts", name: "Accounts", icon: Users, description: "Users, sync" },
+    { id: "time", name: "Time & Language", icon: Clock, description: "Clock, region" },
+    { id: "privacy", name: "Privacy", icon: Shield, description: "Security settings" },
+    { id: "accessibility", name: "Accessibility", icon: Accessibility, description: "Visual aids" },
+    { id: "notifications", name: "Notifications", icon: Bell, description: "Alerts, DND" },
+    { id: "power", name: "Power", icon: Power, description: "Battery, sleep" },
+    { id: "about", name: "About", icon: SettingsIcon, description: "System info" },
   ];
+
+  const filteredCategories = categories.filter(cat =>
+    cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    cat.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const SettingRow = ({ 
+    icon: Icon, 
+    title, 
+    description, 
+    children 
+  }: { 
+    icon: any; 
+    title: string; 
+    description?: string; 
+    children: React.ReactNode 
+  }) => (
+    <div className="flex items-center justify-between p-4 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors group">
+      <div className="flex items-center gap-4">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary/20 transition-colors">
+          <Icon className="w-5 h-5" />
+        </div>
+        <div>
+          <div className="font-medium">{title}</div>
+          {description && <div className="text-sm text-muted-foreground">{description}</div>}
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        {children}
+      </div>
+    </div>
+  );
 
   const renderContent = () => {
     switch (selectedCategory) {
       case "system":
         return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">System</h2>
-              <p className="text-muted-foreground mb-6">Manage system settings and information</p>
+          <div className="space-y-4">
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center">
+                  <Monitor className="w-8 h-8 text-primary" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold">Urbanshade OS</h2>
+                  <p className="text-muted-foreground">Version 3.0</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="p-3 rounded-lg bg-background/50">
+                  <span className="text-muted-foreground">Device:</span>
+                  <span className="ml-2 font-medium">{settings.deviceName || "Urbanshade Terminal"}</span>
+                </div>
+                <div className="p-3 rounded-lg bg-background/50">
+                  <span className="text-muted-foreground">Type:</span>
+                  <span className="ml-2 font-medium">64-bit OS</span>
+                </div>
+              </div>
             </div>
 
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">About</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Device name:</span>
-                  <Input 
-                    value={settings.deviceName} 
-                    onChange={(e) => updateSetting("deviceName", e.target.value)}
-                    className="w-48 h-8"
+            <SettingRow icon={RefreshCw} title="Automatic Updates" description="Keep system up to date">
+              <Switch 
+                checked={autoUpdates} 
+                onCheckedChange={(checked) => { setAutoUpdates(checked); handleSave("settings_auto_updates", checked); }} 
+              />
+            </SettingRow>
+
+            <SettingRow icon={Database} title="Telemetry" description="Help improve the system">
+              <Switch 
+                checked={telemetry} 
+                onCheckedChange={(checked) => { setTelemetry(checked); handleSave("settings_telemetry", checked); }} 
+              />
+            </SettingRow>
+
+            <Button 
+              className="w-full h-12 text-base"
+              onClick={() => {
+                toast.success("Checking for updates...");
+                setTimeout(() => onUpdate?.(), 2000);
+              }}
+            >
+              <RefreshCw className="w-5 h-5 mr-2" />
+              Check for Updates
+            </Button>
+
+            <Collapsible open={developerOptionsOpen} onOpenChange={setDeveloperOptionsOpen}>
+              <CollapsibleTrigger asChild>
+                <Button variant="outline" className="w-full justify-between h-14 px-4">
+                  <div className="flex items-center gap-3">
+                    <Code className="w-5 h-5 text-amber-500" />
+                    <div className="text-left">
+                      <div className="font-semibold text-amber-500">Developer Options</div>
+                      <div className="text-xs text-muted-foreground">Advanced debugging tools</div>
+                    </div>
+                  </div>
+                  <ChevronDown className={`w-5 h-5 transition-transform ${developerOptionsOpen ? 'rotate-180' : ''}`} />
+                </Button>
+              </CollapsibleTrigger>
+              
+              <CollapsibleContent className="mt-3 space-y-3">
+                <SettingRow icon={Code} title="Developer Mode" description="Enable DEF-DEV console access">
+                  <Switch 
+                    checked={developerMode} 
+                    onCheckedChange={(checked) => {
+                      setDeveloperMode(checked);
+                      handleSave("settings_developer_mode", checked);
+                      if (checked) {
+                        toast.success("Developer Mode enabled");
+                        window.open("/def-dev", "_blank");
+                      }
+                    }} 
                   />
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">OS Version:</span>
-                  <span className="font-mono">Urbanshade OS v2.9</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">System Type:</span>
-                  <span>64-bit Operating System</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Processor:</span>
-                  <span>Quantum Core X9 @ 4.2GHz</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Installed RAM:</span>
-                  <span>64 GB</span>
-                </div>
-              </div>
-            </Card>
+                </SettingRow>
 
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Windows Update</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium">Automatic updates</div>
-                    <div className="text-sm text-muted-foreground">Keep your system up to date</div>
-                  </div>
-                  <Switch checked={autoUpdates} onCheckedChange={(checked) => { setAutoUpdates(checked); handleSave("settings_auto_updates", checked); }} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium">Send telemetry data</div>
-                    <div className="text-sm text-muted-foreground">Help improve the system</div>
-                  </div>
-                  <Switch checked={telemetry} onCheckedChange={(checked) => { setTelemetry(checked); handleSave("settings_telemetry", checked); }} />
-                </div>
-                <Button 
-                  className="w-full" 
-                  onClick={() => {
-                    toast.success("Update available! Installing v2.2");
-                    setTimeout(() => onUpdate?.(), 2000);
-                  }}
-                >
-                  Check for updates
-                </Button>
-                <div className="text-sm text-muted-foreground">
-                  Last checked: Just now
-                </div>
-              </div>
-            </Card>
+                <SettingRow icon={AlertTriangle} title="OEM Unlocking" description="Requires factory reset">
+                  <Switch checked={oemUnlocked} onCheckedChange={handleOemUnlockToggle} />
+                </SettingRow>
 
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Advanced system settings</h3>
-              <div className="space-y-2">
-                <Button variant="outline" className="w-full justify-start">System protection</Button>
-                <Button variant="outline" className="w-full justify-start">Remote settings</Button>
-                <Button variant="outline" className="w-full justify-start">Environment variables</Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => {
-                    localStorage.setItem("urbanshade_reboot_to_bios", "true");
-                    toast.success("Rebooting to BIOS Setup...");
-                    setTimeout(() => window.location.reload(), 1000);
-                  }}
-                >
-                  <Power className="w-4 h-4 mr-2" />
-                  Reboot to BIOS
-                </Button>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <Collapsible open={developerOptionsOpen} onOpenChange={setDeveloperOptionsOpen}>
-                <CollapsibleTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between">
-                    <div className="flex items-center gap-2">
-                      <Code className="w-5 h-5 text-amber-500" />
-                      <span className="font-semibold text-amber-500">Developer Options</span>
-                    </div>
-                    <ChevronDown className={`w-4 h-4 transition-transform ${developerOptionsOpen ? 'rotate-180' : ''}`} />
-                  </Button>
-                </CollapsibleTrigger>
-                
-                <CollapsibleContent className="mt-4">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg">
-                      <div>
-                        <div className="font-medium">Developer Mode</div>
-                        <div className="text-sm text-muted-foreground">Enable DEF-DEV debug console access</div>
-                      </div>
-                      <Switch 
-                        checked={developerMode} 
-                        onCheckedChange={(checked) => {
-                          setDeveloperMode(checked);
-                          handleSave("settings_developer_mode", checked);
-                          if (checked) {
-                            toast.success("Developer Mode enabled - Opening DEF-DEV...");
-                            // Open def-dev in new window first, then reload
-                            window.open("/def-dev", "_blank");
-                            setTimeout(() => window.location.reload(), 800);
-                          } else {
-                            toast.success("Developer Mode disabled");
-                          }
-                        }} 
-                      />
-                    </div>
-
-                    {developerMode && (
-                      <Button 
-                        variant="outline" 
-                        className="w-full border-amber-500/30 text-amber-400 hover:bg-amber-500/10"
-                        onClick={() => window.open("/def-dev", "_blank")}
-                      >
-                        <Code className="w-4 h-4 mr-2" />
-                        Launch DEF-DEV Console
-                      </Button>
-                    )}
-
-                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                      <div>
-                        <div className="font-medium flex items-center gap-2">
-                          <AlertTriangle className="w-4 h-4 text-amber-500" />
-                          OEM Unlocking
-                        </div>
-                        <div className="text-sm text-muted-foreground">Allow custom apps in BIOS (requires factory reset)</div>
-                      </div>
-                      <Switch checked={oemUnlocked} onCheckedChange={handleOemUnlockToggle} />
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                      <div>
-                        <div className="font-medium">USB Debugging</div>
-                        <div className="text-sm text-muted-foreground">Allow debugging via USB connection</div>
-                      </div>
-                      <Switch 
-                        checked={usbDebugging} 
-                        onCheckedChange={(checked) => {
-                          setUsbDebugging(checked);
-                          handleSave("settings_usb_debugging", checked);
-                          toast.success(checked ? "USB Debugging enabled" : "USB Debugging disabled");
-                        }} 
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                      <div>
-                        <div className="font-medium">Show Touches</div>
-                        <div className="text-sm text-muted-foreground">Visual feedback for touch interactions</div>
-                      </div>
-                      <Switch 
-                        checked={showTouches} 
-                        onCheckedChange={(checked) => {
-                          setShowTouches(checked);
-                          handleSave("settings_show_touches", checked);
-                        }} 
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                      <div>
-                        <div className="font-medium">Stay Awake</div>
-                        <div className="text-sm text-muted-foreground">Screen stays on while charging</div>
-                      </div>
-                      <Switch 
-                        checked={stayAwake} 
-                        onCheckedChange={(checked) => {
-                          setStayAwake(checked);
-                          handleSave("settings_stay_awake", checked);
-                        }} 
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                      <div>
-                        <div className="font-medium">Strict Mode</div>
-                        <div className="text-sm text-muted-foreground">Flash screen on long operations</div>
-                      </div>
-                      <Switch 
-                        checked={strictMode} 
-                        onCheckedChange={(checked) => {
-                          setStrictMode(checked);
-                          handleSave("settings_strict_mode", checked);
-                        }} 
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                      <div>
-                        <div className="font-medium">Force GPU Rendering</div>
-                        <div className="text-sm text-muted-foreground">Use GPU for 2D drawing</div>
-                      </div>
-                      <Switch 
-                        checked={gpuRendering} 
-                        onCheckedChange={(checked) => {
-                          setGpuRendering(checked);
-                          handleSave("settings_gpu_rendering", checked);
-                        }} 
-                      />
-                    </div>
-
-                    <p className="text-xs text-amber-500/70 mt-4">
-                      ⚠️ Warning: These options are for advanced users. Incorrect settings may cause system instability.
-                    </p>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">System Image</h3>
-              <div className="space-y-2">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={handleExportSystemImage}
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Export System Image
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  Import System Image
-                </Button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept=".json"
-                  className="hidden"
-                  onChange={handleImportSystemImage}
-                />
-              </div>
-            </Card>
-
-            <Card className="p-6 border-destructive">
-              <h3 className="font-semibold mb-4 text-destructive flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5" />
-                Danger Zone
-              </h3>
-              <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  Factory reset will erase all data, installed apps, and return the system to its initial setup state.
-                </p>
-                <Button 
-                  variant="destructive" 
-                  className="w-full"
-                  onClick={() => setShowFactoryResetDialog(true)}
-                >
-                  Factory Reset
-                </Button>
-              </div>
-            </Card>
+                <SettingRow icon={Smartphone} title="USB Debugging" description="Allow USB connection debugging">
+                  <Switch 
+                    checked={usbDebugging} 
+                    onCheckedChange={(checked) => {
+                      setUsbDebugging(checked);
+                      handleSave("settings_usb_debugging", checked);
+                    }} 
+                  />
+                </SettingRow>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
         );
 
       case "display":
         return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Display</h2>
-              <p className="text-muted-foreground mb-6">Adjust screen brightness, resolution, and color</p>
-            </div>
+          <div className="space-y-4">
+            <SettingRow icon={Palette} title="Theme" description="Choose your visual style">
+              <Select value={theme} onValueChange={(v) => { setTheme(v); handleSave("settings_theme", v); }}>
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="dark">Dark</SelectItem>
+                  <SelectItem value="light">Light</SelectItem>
+                  <SelectItem value="system">System</SelectItem>
+                </SelectContent>
+              </Select>
+            </SettingRow>
 
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Brightness</h3>
-              <div className="space-y-4">
-                <Slider 
-                  value={[settings.brightness]} 
-                  onValueChange={(value) => updateSetting("brightness", value[0])}
-                  max={100} 
-                  step={1}
-                  className="w-full"
-                />
-                <div className="text-sm text-muted-foreground text-right">{settings.brightness}%</div>
-              </div>
-            </Card>
+            <SettingRow icon={Monitor} title="Resolution" description="Display resolution">
+              <Select value={resolution} onValueChange={(v) => { setResolution(v); handleSave("settings_resolution", v); }}>
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1920x1080">1920×1080</SelectItem>
+                  <SelectItem value="2560x1440">2560×1440</SelectItem>
+                  <SelectItem value="3840x2160">3840×2160</SelectItem>
+                </SelectContent>
+              </Select>
+            </SettingRow>
 
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Appearance</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Theme</label>
-                  <Select value={theme} onValueChange={(value) => { 
-                    setTheme(value); 
-                    handleSave("settings_theme", value);
-                    document.documentElement.classList.remove('light', 'dark');
-                    if (value !== 'auto') {
-                      document.documentElement.classList.add(value);
-                    }
-                  }}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="dark">Dark</SelectItem>
-                      <SelectItem value="light">Light</SelectItem>
-                      <SelectItem value="auto">Auto (System)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium">Animations</div>
-                    <div className="text-sm text-muted-foreground">Enable smooth transitions</div>
-                  </div>
-                  <Switch checked={settings.animationsEnabled} onCheckedChange={(checked) => updateSetting("animationsEnabled", checked)} />
-                </div>
-                {settings.animationsEnabled && (
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Animation Speed</label>
-                    <Select value={settings.animationSpeed} onValueChange={(value: 'slow' | 'normal' | 'fast' | 'instant') => updateSetting("animationSpeed", value)}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="slow">Slow</SelectItem>
-                        <SelectItem value="normal">Normal</SelectItem>
-                        <SelectItem value="fast">Fast</SelectItem>
-                        <SelectItem value="instant">Instant</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Window Transparency: {settings.windowTransparency}%</label>
-                  <Slider 
-                    value={[settings.windowTransparency]} 
-                    onValueChange={(value) => updateSetting("windowTransparency", value[0])}
-                    max={100} 
-                    min={50}
-                    step={5}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Taskbar</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Taskbar Position</label>
-                  <Select value={settings.taskbarPosition} onValueChange={(value: 'bottom' | 'top' | 'left' | 'right') => updateSetting("taskbarPosition", value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="bottom">Bottom</SelectItem>
-                      <SelectItem value="top">Top</SelectItem>
-                      <SelectItem value="left">Left</SelectItem>
-                      <SelectItem value="right">Right</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium">Show Desktop Switcher</div>
-                    <div className="text-sm text-muted-foreground">Show virtual desktop indicator on taskbar</div>
-                  </div>
-                  <Switch checked={settings.showDesktopSwitcher} onCheckedChange={(checked) => updateSetting("showDesktopSwitcher", checked)} />
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Start Menu</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Start Menu Style</label>
-                  <Select value={settings.startMenuStyle} onValueChange={(value: 'classic' | 'modern') => updateSetting("startMenuStyle", value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="modern">Modern (Windows 10)</SelectItem>
-                      <SelectItem value="classic">Classic</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Scale and layout</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm text-muted-foreground mb-2 block">Display resolution</label>
-                  <Select value={resolution} onValueChange={(value) => { setResolution(value); handleSave("settings_resolution", value); }}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1920x1080">1920 x 1080 (Recommended)</SelectItem>
-                      <SelectItem value="2560x1440">2560 x 1440</SelectItem>
-                      <SelectItem value="3840x2160">3840 x 2160 (4K)</SelectItem>
-                      <SelectItem value="1280x720">1280 x 720</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Color</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium">Night light</div>
-                    <div className="text-sm text-muted-foreground">Reduce blue light at night</div>
-                  </div>
-                  <Switch checked={nightLight} onCheckedChange={(checked) => { 
-                    setNightLight(checked); 
-                    handleSave("settings_night_light", checked);
-                  }} />
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Background</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Gradient Start Color</label>
-                  <input
-                    type="color"
-                    value={settings.bgGradientStart}
-                    onChange={(e) => updateSetting("bgGradientStart", e.target.value)}
-                    className="w-full h-12 rounded-lg cursor-pointer border border-border"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Gradient End Color</label>
-                  <input
-                    type="color"
-                    value={settings.bgGradientEnd}
-                    onChange={(e) => updateSetting("bgGradientEnd", e.target.value)}
-                    className="w-full h-12 rounded-lg cursor-pointer border border-border"
-                  />
-                </div>
-                <div className="p-4 rounded-lg border border-border" style={{
-                  background: `linear-gradient(135deg, ${settings.bgGradientStart}, ${settings.bgGradientEnd})`
-                }}>
-                  <p className="text-sm text-center text-white font-semibold">Preview</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Accent Color</label>
-                  <Select value={settings.accentColor} onValueChange={(value) => updateSetting("accentColor", value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cyan">Cyan</SelectItem>
-                      <SelectItem value="purple">Purple</SelectItem>
-                      <SelectItem value="green">Green</SelectItem>
-                      <SelectItem value="orange">Orange</SelectItem>
-                      <SelectItem value="pink">Pink</SelectItem>
-                      <SelectItem value="blue">Blue</SelectItem>
-                      <SelectItem value="red">Red</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Font Family</label>
-                  <Select value={settings.fontFamily} onValueChange={(value) => updateSetting("fontFamily", value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="JetBrains Mono">JetBrains Mono</SelectItem>
-                      <SelectItem value="Fira Code">Fira Code</SelectItem>
-                      <SelectItem value="Source Code Pro">Source Code Pro</SelectItem>
-                      <SelectItem value="Roboto Mono">Roboto Mono</SelectItem>
-                      <SelectItem value="Inter">Inter</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Glass Opacity: {Math.round(settings.glassOpacity * 100)}%</label>
-                  <Slider 
-                    value={[settings.glassOpacity * 100]} 
-                    onValueChange={(value) => updateSetting("glassOpacity", value[0] / 100)}
-                    max={100} 
-                    min={10}
-                    step={5}
-                    className="w-full"
-                  />
-                </div>
-                <Button 
-                  variant="outline"
-                  onClick={resetToDefaults}
-                  className="w-full"
-                >
-                  Reset to Defaults
-                </Button>
-              </div>
-            </Card>
+            <SettingRow icon={Moon} title="Night Light" description="Reduce blue light">
+              <Switch 
+                checked={nightLight} 
+                onCheckedChange={(checked) => { setNightLight(checked); handleSave("settings_night_light", checked); }} 
+              />
+            </SettingRow>
           </div>
         );
 
       case "network":
         return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Network & Internet</h2>
-              <p className="text-muted-foreground mb-6">Manage Wi-Fi, VPN, and network settings</p>
-            </div>
+          <div className="space-y-4">
+            <SettingRow icon={Wifi} title="Wi-Fi" description="Wireless network connection">
+              <Switch 
+                checked={wifiEnabled} 
+                onCheckedChange={(checked) => { setWifiEnabled(checked); handleSave("settings_wifi", checked); }} 
+              />
+            </SettingRow>
 
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Wi-Fi</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium">Wi-Fi enabled</div>
-                    <div className="text-sm text-muted-foreground">Connected to: URBANSHADE-SECURE</div>
+            <SettingRow icon={Lock} title="VPN" description="Secure connection">
+              <Switch 
+                checked={vpnEnabled} 
+                onCheckedChange={(checked) => { setVpnEnabled(checked); handleSave("settings_vpn", checked); }} 
+              />
+            </SettingRow>
+
+            {wifiEnabled && (
+              <div className="p-4 rounded-xl bg-muted/30 space-y-3">
+                <div className="text-sm font-medium">Available Networks</div>
+                {["URBANSHADE-SECURE", "FACILITY-GUEST", "SCP-NETWORK"].map(network => (
+                  <div key={network} className="flex items-center justify-between p-3 rounded-lg bg-background/50 hover:bg-background/80 transition-colors cursor-pointer">
+                    <div className="flex items-center gap-3">
+                      <Wifi className="w-4 h-4 text-primary" />
+                      <span className="text-sm">{network}</span>
+                    </div>
+                    {network === "URBANSHADE-SECURE" && <Check className="w-4 h-4 text-green-500" />}
                   </div>
-                  <Switch checked={wifiEnabled} onCheckedChange={(checked) => { setWifiEnabled(checked); handleSave("settings_wifi", checked); }} />
-                </div>
-                <Button variant="outline" className="w-full">Manage known networks</Button>
+                ))}
               </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">VPN</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium">VPN connection</div>
-                    <div className="text-sm text-muted-foreground">Secure your connection</div>
-                  </div>
-                  <Switch checked={vpnEnabled} onCheckedChange={(checked) => { setVpnEnabled(checked); handleSave("settings_vpn", checked); }} />
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Proxy</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium">Use proxy server</div>
-                    <div className="text-sm text-muted-foreground">Route traffic through proxy</div>
-                  </div>
-                  <Switch checked={proxyEnabled} onCheckedChange={(checked) => { setProxyEnabled(checked); handleSave("settings_proxy", checked); }} />
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Network Status</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Status:</span>
-                  <span className="text-green-500">Connected</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">IP Address:</span>
-                  <span className="font-mono">10.23.45.67</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Signal Strength:</span>
-                  <span>Excellent</span>
-                </div>
-              </div>
-            </Card>
+            )}
           </div>
         );
 
       case "sound":
         return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Sound</h2>
-              <p className="text-muted-foreground mb-6">Manage audio devices and volume</p>
+          <div className="space-y-4">
+            <div className="p-6 rounded-xl bg-muted/30">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <Volume2 className="w-5 h-5 text-primary" />
+                  <span className="font-medium">Master Volume</span>
+                </div>
+                <span className="text-sm text-muted-foreground">{volume[0]}%</span>
+              </div>
+              <Slider 
+                value={volume} 
+                max={100} 
+                step={1}
+                onValueChange={(v) => { setVolume(v); handleSave("settings_volume", v); }}
+                className="w-full"
+              />
             </div>
 
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Volume</h3>
-              <div className="space-y-4">
-                <Slider 
-                  value={muteEnabled ? [0] : volume} 
-                  onValueChange={(value) => { 
-                    setVolume(value); 
-                    handleSave("settings_volume", value);
-                    if (value[0] > 0 && muteEnabled) {
-                      setMuteEnabled(false);
-                      handleSave("settings_mute", false);
-                    }
-                  }}
-                  max={100} 
-                  step={1}
-                  className="w-full"
-                />
-                <div className="text-sm text-muted-foreground text-right">{muteEnabled ? 0 : volume[0]}%</div>
-                <div className="flex items-center justify-between pt-2">
-                  <div className="font-medium">Mute</div>
-                  <Switch checked={muteEnabled} onCheckedChange={(checked) => { setMuteEnabled(checked); handleSave("settings_mute", checked); }} />
-                </div>
-              </div>
-            </Card>
+            <SettingRow icon={muteEnabled ? X : Volume2} title="Mute" description="Silence all sounds">
+              <Switch 
+                checked={muteEnabled} 
+                onCheckedChange={(checked) => { setMuteEnabled(checked); handleSave("settings_mute", checked); }} 
+              />
+            </SettingRow>
 
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Output Device</h3>
-              <Select defaultValue="speakers">
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="speakers">Speakers (High Definition Audio)</SelectItem>
-                  <SelectItem value="headphones">Headphones</SelectItem>
-                  <SelectItem value="hdmi">HDMI Audio</SelectItem>
-                </SelectContent>
-              </Select>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Input Device</h3>
-              <Select defaultValue="microphone">
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="microphone">Microphone (Built-in)</SelectItem>
-                  <SelectItem value="external">External Microphone</SelectItem>
-                </SelectContent>
-              </Select>
-            </Card>
-          </div>
-        );
-
-      case "storage":
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Storage</h2>
-              <p className="text-muted-foreground mb-6">Manage disk space and storage devices</p>
-            </div>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Local Disk (C:)</h3>
-              <div className="space-y-4">
-                <div className="w-full h-4 bg-secondary rounded-full overflow-hidden">
-                  <div className="h-full bg-primary" style={{ width: "68%" }} />
-                </div>
-                <div className="text-sm space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Used:</span>
-                    <span className="font-mono">680 GB of 1 TB</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Free:</span>
-                    <span className="font-mono">320 GB</span>
-                  </div>
-                </div>
-                <Button variant="outline" className="w-full">Clean up disk</Button>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Storage Categories</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">System files:</span>
-                  <span className="font-mono">45 GB</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Applications:</span>
-                  <span className="font-mono">320 GB</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Documents:</span>
-                  <span className="font-mono">150 GB</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Temporary files:</span>
-                  <span className="font-mono">15 GB</span>
-                </div>
-              </div>
-            </Card>
+            <SettingRow icon={Zap} title="Sound Effects" description="System sounds and alerts">
+              <Switch 
+                checked={soundEffects} 
+                onCheckedChange={(checked) => { setSoundEffects(checked); handleSave("settings_sound_effects", checked); }} 
+              />
+            </SettingRow>
           </div>
         );
 
       case "notifications":
         return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Notifications</h2>
-              <p className="text-muted-foreground mb-6">Manage system and app notifications</p>
-            </div>
+          <div className="space-y-4">
+            <SettingRow icon={Bell} title="Notifications" description="Enable system notifications">
+              <Switch 
+                checked={notificationsEnabled} 
+                onCheckedChange={(checked) => { setNotificationsEnabled(checked); handleSave("settings_notifications", checked); }} 
+              />
+            </SettingRow>
 
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Notification Settings</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium">Notifications</div>
-                    <div className="text-sm text-muted-foreground">Show notifications from apps and system</div>
-                  </div>
-                  <Switch checked={notificationsEnabled} onCheckedChange={(checked) => { setNotificationsEnabled(checked); handleSave("settings_notifications", checked); }} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium">Do not disturb</div>
-                    <div className="text-sm text-muted-foreground">Silence all notifications</div>
-                  </div>
-                  <Switch checked={doNotDisturb} onCheckedChange={(checked) => { setDoNotDisturb(checked); handleSave("settings_dnd", checked); }} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium">Notification sounds</div>
-                    <div className="text-sm text-muted-foreground">Play sound for notifications</div>
-                  </div>
-                  <Switch checked={notificationSound} onCheckedChange={(checked) => { setNotificationSound(checked); handleSave("settings_notification_sound", checked); }} />
-                </div>
-              </div>
-            </Card>
-          </div>
-        );
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Notifications</h2>
-              <p className="text-muted-foreground mb-6">Manage system and app notifications</p>
-            </div>
-
-            <Card className="p-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium">Notifications</div>
-                    <div className="text-sm text-muted-foreground">Get notifications from apps and senders</div>
-                  </div>
-                  <Switch checked={notificationsEnabled} onCheckedChange={(checked) => { setNotificationsEnabled(checked); handleSave("settings_notifications", checked); }} />
-                </div>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium">Do not disturb</div>
-                    <div className="text-sm text-muted-foreground">Hide notifications and sounds</div>
-                  </div>
-                  <Switch checked={doNotDisturb} onCheckedChange={(checked) => { setDoNotDisturb(checked); handleSave("settings_dnd", checked); }} />
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Notification Settings</h3>
-              <div className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">Notification sounds</Button>
-                <Button variant="outline" className="w-full justify-start">Focus assist</Button>
-                <Button variant="outline" className="w-full justify-start">Notification history</Button>
-              </div>
-            </Card>
+            <SettingRow icon={Moon} title="Do Not Disturb" description="Silence notifications">
+              <Switch 
+                checked={doNotDisturb} 
+                onCheckedChange={(checked) => { setDoNotDisturb(checked); handleSave("settings_dnd", checked); }} 
+              />
+            </SettingRow>
           </div>
         );
 
       case "accounts":
         return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Accounts</h2>
-              <p className="text-muted-foreground mb-6">Manage user accounts and sign-in options</p>
-            </div>
-
-            {/* Online Account Section - Only visible when signed in */}
-            {isOnlineMode && user ? (
-              <Card className="p-6 border-blue-500/30 bg-blue-500/5">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <Cloud className="w-5 h-5 text-blue-400" />
-                  Online Account
-                </h3>
-                
-                <div className="space-y-4">
-                  {/* Account Info */}
-                  <div className="flex items-center gap-4 p-4 bg-black/20 rounded-lg">
-                    <div className="w-14 h-14 rounded-full bg-blue-500/20 flex items-center justify-center">
-                      <Cloud className="w-7 h-7 text-blue-400" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-bold text-blue-400">{profile?.display_name || profile?.username || "Online User"}</div>
-                      <div className="text-sm text-muted-foreground">{user.email}</div>
-                      <div className="text-xs text-green-400 mt-1">● Signed in</div>
-                    </div>
-                  </div>
-
-                  {/* Sign Out */}
-                  <Button 
-                    variant="outline" 
-                    className="w-full border-red-500/30 text-red-400 hover:bg-red-500/10"
-                    onClick={() => setShowSignOutDialog(true)}
-                  >
+          <div className="space-y-4">
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-blue-500/10 via-blue-500/5 to-transparent border border-blue-500/20">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl bg-blue-500/20 flex items-center justify-center">
+                  <Cloud className="w-8 h-8 text-blue-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg">{isOnlineMode ? "Connected" : "Offline Mode"}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {isOnlineMode ? `Signed in as ${profile?.username || user?.email}` : "Sign in to sync your data"}
+                  </p>
+                </div>
+                {isOnlineMode ? (
+                  <Button variant="outline" onClick={signOut}>
                     <LogOut className="w-4 h-4 mr-2" />
                     Sign Out
                   </Button>
-                </div>
-              </Card>
-            ) : (
-              <Card className="p-6 border-blue-500/30 bg-blue-500/5">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <Cloud className="w-5 h-5 text-blue-400" />
-                  Cloud Account
-                </h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Connect to a cloud account to sync your settings across devices and use online features like messaging.
-                </p>
-                <div className="space-y-2">
-                  <Button 
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                    onClick={() => window.location.href = '/acc-manage/general'}
-                  >
-                    <LogIn className="w-4 h-4 mr-2" />
-                    Sign In to Cloud
-                  </Button>
-                </div>
-              </Card>
-            )}
-
-            {/* Cloud Sync Settings - New Enhanced Panel */}
-            <SyncSettingsPanel 
-              isOnlineMode={isOnlineMode}
-              user={user}
-              onManualSync={manualSync}
-            />
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Your account</h3>
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Users className="w-8 h-8 text-primary" />
-                </div>
-                <div>
-                  <div className="font-bold">Administrator</div>
-                  <div className="text-sm text-muted-foreground">
-                    {isOnlineMode ? "Online Account" : "Local Account"}
-                  </div>
-                </div>
-              </div>
-              <Button variant="outline" className="w-full">Change account settings</Button>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Sign-in options</h3>
-              <div className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">Password</Button>
-                <Button variant="outline" className="w-full justify-start">PIN</Button>
-                <Button variant="outline" className="w-full justify-start">Biometric</Button>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Other accounts</h3>
-              <div className="space-y-3">
-                <p className="text-sm text-muted-foreground mb-3">
-                  Add additional user accounts for other people who use this device.
-                </p>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => setShowAddAccountDialog(true)}
-                >
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Add Account
-                </Button>
-              </div>
-            </Card>
-
-            <Card className="p-6 border-amber-500/30 bg-amber-500/5">
-              <h3 className="font-semibold mb-4 flex items-center gap-2">
-                <Users className="w-5 h-5 text-amber-400" />
-                Guest Account
-              </h3>
-              <div className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Allow temporary access without a password. Guest sessions don't save data.
-                </p>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium">Enable Guest Account</div>
-                    <div className="text-sm text-muted-foreground">Allow guests to use this computer</div>
-                  </div>
-                  <Switch 
-                    checked={settings.guestAccountEnabled} 
-                    onCheckedChange={(checked) => {
-                      updateSetting("guestAccountEnabled", checked);
-                      toast.success(checked ? "Guest account enabled" : "Guest account disabled");
-                    }} 
-                  />
-                </div>
-                {settings.guestAccountEnabled && (
-                  <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-xs text-amber-400">
-                    Guests can sign in from the lock screen. Their session will be temporary.
-                  </div>
+                ) : (
+                  <Button>Sign In</Button>
                 )}
               </div>
-            </Card>
-          </div>
-        );
-
-      case "time":
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Time & Language</h2>
-              <p className="text-muted-foreground mb-6">Manage date, time, and regional settings</p>
             </div>
 
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Date & Time</h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Time zone</label>
-                  <Select value={timeZone} onValueChange={(value) => { setTimeZone(value); handleSave("settings_timezone", value); }}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="UTC-8">Pacific Time (UTC-8)</SelectItem>
-                      <SelectItem value="UTC-7">Mountain Time (UTC-7)</SelectItem>
-                      <SelectItem value="UTC-6">Central Time (UTC-6)</SelectItem>
-                      <SelectItem value="UTC-5">Eastern Time (UTC-5)</SelectItem>
-                      <SelectItem value="UTC+0">GMT (UTC+0)</SelectItem>
-                      <SelectItem value="UTC+1">Central European (UTC+1)</SelectItem>
-                      <SelectItem value="UTC+8">China (UTC+8)</SelectItem>
-                      <SelectItem value="UTC+9">Japan (UTC+9)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-2 block">Date format</label>
-                  <Select value={dateFormat} onValueChange={(value) => { setDateFormat(value); handleSave("settings_date_format", value); }}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
-                      <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
-                      <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Language</h3>
-              <div>
-                <label className="text-sm font-medium mb-2 block">Display language</label>
-                <Select value={language} onValueChange={(value) => { setLanguage(value); handleSave("settings_language", value); }}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="English">English (United States)</SelectItem>
-                    <SelectItem value="Spanish">Spanish</SelectItem>
-                    <SelectItem value="French">French</SelectItem>
-                    <SelectItem value="German">German</SelectItem>
-                    <SelectItem value="Japanese">Japanese</SelectItem>
-                    <SelectItem value="Chinese">Chinese (Simplified)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </Card>
-          </div>
-        );
-
-      case "privacy":
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Privacy & Security</h2>
-              <p className="text-muted-foreground mb-6">Manage privacy settings and security features</p>
-            </div>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Location Services</h3>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium">Allow apps to access location</div>
-                  <div className="text-sm text-muted-foreground">Help apps provide location-based services</div>
-                </div>
-                <Switch checked={locationTracking} onCheckedChange={(checked) => { setLocationTracking(checked); handleSave("settings_location", checked); }} />
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Diagnostics & Feedback</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium">Send crash reports</div>
-                    <div className="text-sm text-muted-foreground">Help improve system stability</div>
-                  </div>
-                  <Switch checked={crashReports} onCheckedChange={(checked) => { setCrashReports(checked); handleSave("settings_crash_reports", checked); }} />
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Security Status</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Firewall:</span>
-                  <span className="text-green-500">Active</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Antivirus:</span>
-                  <span className="text-green-500">Up to date</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Last scan:</span>
-                  <span>Today, 2:15 PM</span>
-                </div>
-              </div>
-            </Card>
-          </div>
-        );
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Privacy & Security</h2>
-              <p className="text-muted-foreground mb-6">Manage privacy settings and security features</p>
-            </div>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Security Status</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500" />
-                  <span>Firewall is on</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500" />
-                  <span>Virus protection is up to date</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-yellow-500" />
-                  <span>Account protection needs attention</span>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Privacy Options</h3>
-              <div className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">App permissions</Button>
-                <Button variant="outline" className="w-full justify-start">Location</Button>
-                <Button variant="outline" className="w-full justify-start">Camera</Button>
-                <Button variant="outline" className="w-full justify-start">Microphone</Button>
-              </div>
-            </Card>
-          </div>
-        );
-
-      case "accessibility":
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Accessibility</h2>
-              <p className="text-muted-foreground mb-6">Make your device easier to use</p>
-            </div>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Vision</h3>
-              <div className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">Display</Button>
-                <Button variant="outline" className="w-full justify-start">Text size</Button>
-                <Button variant="outline" className="w-full justify-start">Magnifier</Button>
-                <Button variant="outline" className="w-full justify-start">Color filters</Button>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Hearing</h3>
-              <div className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">Audio</Button>
-                <Button variant="outline" className="w-full justify-start">Captions</Button>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Interaction</h3>
-              <div className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">Speech</Button>
-                <Button variant="outline" className="w-full justify-start">Keyboard</Button>
-                <Button variant="outline" className="w-full justify-start">Mouse</Button>
-              </div>
-            </Card>
-          </div>
-        );
-
-      case "power":
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Power & Battery</h2>
-              <p className="text-muted-foreground mb-6">Manage power settings and battery usage</p>
-            </div>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Power Mode</h3>
-              <div>
-                <label className="text-sm font-medium mb-3 block">Select power mode</label>
-                <Select value={powerMode} onValueChange={(value) => { setPowerMode(value); handleSave("settings_power_mode", value); }}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="power-saver">Power Saver</SelectItem>
-                    <SelectItem value="balanced">Balanced (Recommended)</SelectItem>
-                    <SelectItem value="high-performance">High Performance</SelectItem>
-                    <SelectItem value="maximum">Maximum Performance</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-muted-foreground mt-2">
-                  {powerMode === "power-saver" && "Extends battery life by reducing performance"}
-                  {powerMode === "balanced" && "Balances performance and energy consumption"}
-                  {powerMode === "high-performance" && "Prioritizes performance over battery life"}
-                  {powerMode === "maximum" && "Maximum performance, highest power consumption"}
-                </p>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Power Status</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Battery:</span>
-                  <span className="text-green-500">98% (Charging)</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Power Source:</span>
-                  <span>Fusion Reactor</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Estimated Runtime:</span>
-                  <span>72 hours</span>
-                </div>
-              </div>
-            </Card>
-          </div>
-        );
-        return (
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Power & Battery</h2>
-              <p className="text-muted-foreground mb-6">Manage power settings and battery usage</p>
-            </div>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Power Status</h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Power mode:</span>
-                  <span>Best performance</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Screen timeout:</span>
-                  <span>15 minutes</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Sleep mode:</span>
-                  <span>30 minutes</span>
-                </div>
-              </div>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Power Plan</h3>
-              <Select defaultValue="balanced">
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="power-saver">Power saver</SelectItem>
-                  <SelectItem value="balanced">Balanced (Recommended)</SelectItem>
-                  <SelectItem value="high-performance">High performance</SelectItem>
-                </SelectContent>
-              </Select>
-            </Card>
-
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Advanced Power Settings</h3>
-              <div className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">Display and sleep</Button>
-                <Button variant="outline" className="w-full justify-start">Lid and power button</Button>
-              </div>
-            </Card>
+            {isOnlineMode && syncEnabled && (
+              <SettingRow icon={RefreshCw} title="Sync Status" description={lastSyncTime ? `Last synced: ${new Date(lastSyncTime).toLocaleString()}` : "Never synced"}>
+                <Button variant="ghost" size="sm" onClick={manualSync} disabled={isSyncing}>
+                  {isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                </Button>
+              </SettingRow>
+            )}
           </div>
         );
 
       case "about":
         return (
-          <div className="space-y-6 animate-fade-in">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">About Urbanshade OS</h2>
-              <p className="text-muted-foreground mb-6">Information about your system and the team behind it</p>
+          <div className="space-y-4">
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 text-center">
+              <div className="w-20 h-20 rounded-2xl bg-primary/20 flex items-center justify-center mx-auto mb-4">
+                <SettingsIcon className="w-10 h-10 text-primary" />
+              </div>
+              <h2 className="text-2xl font-bold mb-1">Urbanshade OS</h2>
+              <p className="text-muted-foreground mb-4">Version 3.0.0 Build 2024</p>
+              <div className="text-xs text-muted-foreground">© 2024 Urbanshade Corporation</div>
             </div>
 
-            {/* Hero Card */}
-            <Card className="p-6 bg-gradient-to-br from-primary/10 via-blue-500/5 to-purple-500/10 border-primary/20">
-              <div className="flex items-center gap-6 mb-6">
-                <div className="w-24 h-24 bg-gradient-to-br from-primary/30 to-primary/10 rounded-2xl flex items-center justify-center shadow-lg border border-primary/20">
-                  <SettingsIcon className="w-14 h-14 text-primary" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
-                    URBANSHADE OS
-                  </h3>
-                  <p className="text-muted-foreground text-lg">Version 2.9.0</p>
-                  <p className="text-xs text-muted-foreground mt-1 font-mono">Build 20251225 • 64-bit</p>
-                </div>
-              </div>
+            <div className="grid grid-cols-2 gap-3">
+              <input ref={fileInputRef} type="file" accept=".img,.json" onChange={handleImportSystemImage} className="hidden" />
+              <Button variant="outline" className="h-14" onClick={() => fileInputRef.current?.click()}>
+                <Upload className="w-5 h-5 mr-2" />
+                Import Image
+              </Button>
+              <Button variant="outline" className="h-14" onClick={handleExportSystemImage}>
+                <Download className="w-5 h-5 mr-2" />
+                Export Image
+              </Button>
+            </div>
 
-              <div className="grid grid-cols-3 gap-4 p-4 rounded-lg bg-muted/30 border border-white/5">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-primary">3</p>
-                  <p className="text-xs text-muted-foreground">Team Members</p>
-                </div>
-                <div className="text-center border-x border-white/10">
-                  <p className="text-2xl font-bold text-primary">2025</p>
-                  <p className="text-xs text-muted-foreground">Started</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-primary">🇱🇻</p>
-                  <p className="text-xs text-muted-foreground">Made in Latvia</p>
-                </div>
-              </div>
-            </Card>
-
-            {/* Team Section */}
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="font-semibold flex items-center gap-2">
-                  <Users className="w-5 h-5 text-primary" />
-                  The Team
-                </h4>
-                <Button 
-                  variant="ghost" 
-                  size="sm"
-                  className="text-primary hover:text-primary/80"
-                  onClick={() => window.open('/team', '_blank')}
-                >
-                  Meet the full team →
-                </Button>
-              </div>
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-yellow-500/10 to-amber-500/5 border border-yellow-500/20 hover:border-yellow-500/40 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center text-lg">
-                    👑
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-yellow-500">Aswd_LV</p>
-                    <p className="text-xs text-muted-foreground">Founder & CEO • 95% of code</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-slate-500/10 to-zinc-500/5 border border-slate-500/20 hover:border-slate-500/40 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-slate-500/20 flex items-center justify-center text-lg">
-                    ☁️
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-slate-400">plplll</p>
-                    <p className="text-xs text-muted-foreground">Developer • Cloud features & ideas</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-green-500/10 to-emerald-500/5 border border-green-500/20 hover:border-green-500/40 transition-colors">
-                  <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center text-lg">
-                    🌾
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium text-green-500">Kombainis_yehaw</p>
-                    <p className="text-xs text-muted-foreground">QA Tester • Bug hunter extraordinaire</p>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* Links & Info */}
-            <Card className="p-6">
-              <h4 className="font-semibold mb-4">Quick Links</h4>
-              <div className="grid grid-cols-2 gap-3">
-                <Button 
-                  variant="outline" 
-                  className="justify-start h-auto py-3"
-                  onClick={() => window.open('https://github.com/Urbanshade-Team', '_blank')}
-                >
-                  <Globe className="w-4 h-4 mr-2" />
-                  <div className="text-left">
-                    <p className="text-sm font-medium">GitHub</p>
-                    <p className="text-xs text-muted-foreground">View source code</p>
-                  </div>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="justify-start h-auto py-3"
-                  onClick={() => window.open('/team', '_blank')}
-                >
-                  <Users className="w-4 h-4 mr-2" />
-                  <div className="text-left">
-                    <p className="text-sm font-medium">Team Page</p>
-                    <p className="text-xs text-muted-foreground">Meet the crew</p>
-                  </div>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="justify-start h-auto py-3"
-                  onClick={() => window.open('/docs', '_blank')}
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  <div className="text-left">
-                    <p className="text-sm font-medium">Documentation</p>
-                    <p className="text-xs text-muted-foreground">Learn more</p>
-                  </div>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="justify-start h-auto py-3"
-                  onClick={() => window.open('/status', '_blank')}
-                >
-                  <Wifi className="w-4 h-4 mr-2" />
-                  <div className="text-left">
-                    <p className="text-sm font-medium">Status</p>
-                    <p className="text-xs text-muted-foreground">System status</p>
-                  </div>
-                </Button>
-              </div>
-            </Card>
-
-            {/* Legal */}
-            <Card className="p-6">
-              <h4 className="font-semibold mb-3">License & Legal</h4>
-              <p className="text-sm text-muted-foreground mb-4">
-                © 2025 Urbanshade Corporation • Deep Sea Research Division • All Rights Reserved
-              </p>
-              <p className="text-xs text-muted-foreground mb-4">
-                This software is provided as-is for research and development purposes. 
-                Urbanshade Corporation assumes no liability for any incidents, accidents, 
-                or anomalies that may occur during operation.
-              </p>
-              <div className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => window.open('/terms', '_blank')}
-                >
-                  Terms of Service
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => window.open('/privacy', '_blank')}
-                >
-                  Privacy Policy
-                </Button>
-              </div>
-            </Card>
-
-            {/* Actions */}
-            <Card className="p-6">
-              <h4 className="font-semibold mb-4">System Actions</h4>
-              <div className="space-y-2">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => {
-                    localStorage.removeItem("urbanshade_last_seen_version");
-                    window.location.reload();
-                  }}
-                >
-                  📋 View Changelog
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  📜 View Open Source Licenses
-                </Button>
-              </div>
-            </Card>
+            <Button 
+              variant="destructive" 
+              className="w-full h-14"
+              onClick={() => setShowFactoryResetDialog(true)}
+            >
+              <AlertTriangle className="w-5 h-5 mr-2" />
+              Factory Reset
+            </Button>
           </div>
         );
 
       default:
-        return <div>Select a category</div>;
+        return (
+          <div className="flex items-center justify-center h-full text-muted-foreground">
+            <div className="text-center">
+              <SettingsIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
+              <p>Select a category to view settings</p>
+            </div>
+          </div>
+        );
     }
   };
 
   return (
-    <>
-      <div className="flex h-full bg-background">
-        {/* Sidebar */}
-        <div className="w-64 border-r border-border bg-muted/30 p-4 overflow-auto">
-          <div className="mb-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input 
-                placeholder="Find a setting" 
-                className="pl-10"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            {categories
-              .filter(cat => cat.name.toLowerCase().includes(searchQuery.toLowerCase()))
-              .map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left ${
-                  selectedCategory === category.id
-                    ? "bg-primary/20 text-primary"
-                    : "hover:bg-muted text-foreground"
-                }`}
-              >
-                {category.icon}
-                <span className="text-sm font-medium">{category.name}</span>
-              </button>
-            ))}
+    <div className="flex h-full bg-background">
+      {/* Sidebar */}
+      <div className="w-72 border-r border-border/50 flex flex-col bg-muted/20">
+        <div className="p-4 border-b border-border/50">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Search settings..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 bg-background/50"
+            />
           </div>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-auto">
-          <div className="max-w-4xl mx-auto p-8">
-            {renderContent()}
+        <ScrollArea className="flex-1">
+          <div className="p-2 space-y-1">
+            {filteredCategories.map((category) => {
+              const Icon = category.icon;
+              return (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${
+                    selectedCategory === category.id
+                      ? "bg-primary/10 text-primary border border-primary/30"
+                      : "hover:bg-muted/50 text-foreground"
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm">{category.name}</div>
+                    <div className="text-xs text-muted-foreground truncate">{category.description}</div>
+                  </div>
+                  <ChevronRight className={`w-4 h-4 transition-transform ${selectedCategory === category.id ? 'text-primary' : 'text-muted-foreground'}`} />
+                </button>
+              );
+            })}
           </div>
-        </div>
+        </ScrollArea>
       </div>
 
-      {/* Factory Reset Confirmation Dialog */}
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        <div className="p-6 border-b border-border/50 bg-muted/10">
+          <h1 className="text-2xl font-bold">{categories.find(c => c.id === selectedCategory)?.name || "Settings"}</h1>
+          <p className="text-muted-foreground">{categories.find(c => c.id === selectedCategory)?.description}</p>
+        </div>
+
+        <ScrollArea className="flex-1 p-6">
+          {renderContent()}
+        </ScrollArea>
+      </div>
+
+      {/* Factory Reset Dialog */}
       <Dialog open={showFactoryResetDialog} onOpenChange={setShowFactoryResetDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-destructive">
               <AlertTriangle className="w-5 h-5" />
-              Confirm Factory Reset
+              Factory Reset
             </DialogTitle>
             <DialogDescription>
-              This action cannot be undone. All data, settings, installed apps, and user accounts will be permanently deleted. 
-              The system will restart and require setup again.
+              This will erase ALL data and settings. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowFactoryResetDialog(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={handleFactoryReset}>
-              Reset System
-            </Button>
+            <Button variant="outline" onClick={() => setShowFactoryResetDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleFactoryReset}>Reset Everything</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Add Account Dialog */}
-      <Dialog open={showAddAccountDialog} onOpenChange={setShowAddAccountDialog}>
+      {/* OEM Unlock Dialog */}
+      <Dialog open={showOemDialog} onOpenChange={setShowOemDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Account</DialogTitle>
-            <DialogDescription>
-              Create a new user account for this device.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Username</label>
-              <Input
-                value={newAccountUsername}
-                onChange={(e) => setNewAccountUsername(e.target.value)}
-                placeholder="Enter username"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Password</label>
-              <Input
-                type="password"
-                value={newAccountPassword}
-                onChange={(e) => setNewAccountPassword(e.target.value)}
-                placeholder="Enter password"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAddAccountDialog(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleAddAccount}>
-              Create Account
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Sign Out Confirmation Dialog */}
-      <Dialog open={showSignOutDialog} onOpenChange={setShowSignOutDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <LogOut className="w-5 h-5 text-red-400" />
-              Sign Out of Online Account
+            <DialogTitle className="flex items-center gap-2 text-amber-500">
+              <AlertTriangle className="w-5 h-5" />
+              OEM Unlock Warning
             </DialogTitle>
             <DialogDescription>
-              You will be signed out of your online account. Your local data will remain, but cloud sync will be disabled until you sign in again.
+              Changing OEM unlock state requires a factory reset. All data will be erased.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowSignOutDialog(false)}>
-              Cancel
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={async () => {
-                await signOut();
-                setShowSignOutDialog(false);
-                toast.success("Signed out successfully");
-              }}
-            >
-              Sign Out
-            </Button>
+            <Button variant="outline" onClick={() => setShowOemDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleOemUnlockConfirm}>Continue with Reset</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Sync Conflict Dialog */}
-      <SyncConflictDialog
-        open={showConflictDialog || hasConflict}
-        onClose={() => setShowConflictDialog(false)}
-        cloudSettings={cloudSettings}
-        onUseLocal={() => resolveConflict("local")}
-        onUseCloud={() => {
-          resolveConflict("cloud");
-          setTimeout(() => window.location.reload(), 500);
-        }}
-        onMerge={() => {
-          resolveConflict("merge");
-          setTimeout(() => window.location.reload(), 500);
-        }}
-      />
-    </>
+    </div>
   );
 };
