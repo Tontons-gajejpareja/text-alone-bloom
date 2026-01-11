@@ -285,14 +285,16 @@ export const ChangelogDialog = () => {
           "Vite for blazing fast development"
         ],
         "Project Timeline": [
-          "January 27, 2025: Project started - v1.0 original release",
-          "August 2025: v2.0 - The Vite Rewrite",
-          "September 2025: v2.5 - UUR Manager Update",
-          "October 2025: v2.6 - Security Update (Online Accounts)",
-          "November 2025: v2.7 - Cloud Sync Update",
-          "December 2025: v2.8 - The Mass Update",
-          "December 2025: v2.9 - Visual Overhaul",
-          "January 2026: v3.0 - The Year Update (current)"
+          "Jan 27 2025 — Small beginnings",
+          "February 2025 — First API",
+          "April 2025 — First DEF-DEV iteration",
+          "May 2025 — Improved work",
+          "August 2025 — Rewrite in Vite + React",
+          "September 2025 — DEF-DEV console no longer admin-only",
+          "October 2025 — NOW PUBLIC!",
+          "November 2025 — Online features",
+          "December 2025 — A ton of bug fixes",
+          "January 2026 — Working on v3.0: THE YEAR UPDATE"
         ]
       }
     }
