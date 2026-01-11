@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Lock, User, Users, ChevronRight, Loader2 } from "lucide-react";
+import { Lock, User, Shield, ChevronRight, Loader2, ArrowLeft } from "lucide-react";
 
 interface LoginScreenProps {
   onLogin: () => void;
@@ -9,18 +9,11 @@ interface UserAccount {
   id: string;
   username: string;
   displayName: string;
+  role: string;
+  clearance: number;
   hasPassword: boolean;
   isAdmin: boolean;
-  avatarColor: string;
 }
-
-const avatarColors = [
-  "from-blue-500 to-cyan-500",
-  "from-purple-500 to-pink-500",
-  "from-green-500 to-emerald-500",
-  "from-orange-500 to-red-500",
-  "from-indigo-500 to-violet-500",
-];
 
 export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [accounts, setAccounts] = useState<UserAccount[]>([]);
@@ -42,9 +35,10 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
         id: "admin",
         username: admin.username,
         displayName: admin.displayName || admin.username,
+        role: "System Administrator",
+        clearance: 5,
         hasPassword: !!admin.password,
         isAdmin: true,
-        avatarColor: avatarColors[0],
       });
     }
     
@@ -57,9 +51,10 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
           id: acc.id || `user-${index}`,
           username: acc.username,
           displayName: acc.displayName || acc.username,
+          role: acc.role || "Operator",
+          clearance: acc.clearance || 3,
           hasPassword: !!acc.password,
           isAdmin: false,
-          avatarColor: avatarColors[(index + 1) % avatarColors.length],
         });
       });
     }
@@ -91,7 +86,6 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
     
     if (!selectedAccount) return;
 
-    // Check if password is required
     if (selectedAccount.hasPassword && !password) {
       setError("Password required");
       return;
@@ -100,7 +94,6 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
     setLoading(true);
 
     setTimeout(() => {
-      // Verify password
       if (selectedAccount.isAdmin) {
         const adminData = localStorage.getItem("urbanshade_admin");
         if (adminData) {
@@ -146,155 +139,162 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   };
 
   return (
-    <div className="h-screen w-full flex flex-col bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative overflow-hidden">
-      {/* Ambient background effects */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/5 rounded-full blur-3xl" />
-      </div>
-
-      {/* Account tiles - top left when no selection, center when selected */}
-      <div className={`absolute transition-all duration-500 ease-out ${
-        selectedAccount 
-          ? "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" 
-          : "top-6 left-6"
-      }`}>
+    <div className="h-screen w-full flex flex-col bg-slate-900 relative overflow-hidden">
+      {/* Subtle background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
+      
+      {/* Main content - centered */}
+      <div className="flex-1 flex items-center justify-center relative z-10">
         {!selectedAccount ? (
-          // Account selection tiles
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-muted-foreground text-xs mb-3 px-1">
-              <Users className="w-4 h-4" />
-              <span>Select account</span>
-            </div>
-            
-            {accounts.length === 0 ? (
-              <div className="text-muted-foreground text-sm px-1">
-                No accounts configured
+          // User selection panel
+          <div className="w-full max-w-lg mx-4">
+            <div className="rounded-2xl border border-cyan-500/30 bg-slate-800/50 backdrop-blur-sm p-6">
+              {/* Header */}
+              <div className="flex items-center gap-3 mb-6">
+                <Lock className="w-5 h-5 text-cyan-400" />
+                <span className="text-cyan-400 font-mono tracking-wider text-sm">SELECT USER</span>
               </div>
-            ) : (
-              <div className="space-y-1.5">
-                {accounts.map((account) => (
-                  <button
-                    key={account.id}
-                    onClick={() => handleSelectAccount(account)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 hover:border-white/20 transition-all group w-64"
-                  >
-                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${account.avatarColor} flex items-center justify-center text-white font-semibold shadow-lg`}>
-                      {account.displayName.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="flex-1 text-left">
-                      <div className="text-sm font-medium text-foreground">{account.displayName}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {account.isAdmin ? "Administrator" : "User"}
+              
+              {/* User tiles */}
+              <div className="space-y-3">
+                {accounts.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <User className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>No accounts configured</p>
+                  </div>
+                ) : (
+                  accounts.map((account) => (
+                    <button
+                      key={account.id}
+                      onClick={() => handleSelectAccount(account)}
+                      className="w-full flex items-center gap-4 p-4 rounded-xl bg-slate-700/50 border border-slate-600/50 hover:bg-slate-700 hover:border-cyan-500/30 transition-colors text-left group"
+                    >
+                      {/* Avatar */}
+                      <div className="w-14 h-14 rounded-full bg-cyan-900/50 border border-cyan-500/30 flex items-center justify-center flex-shrink-0">
+                        {account.isAdmin ? (
+                          <Shield className="w-7 h-7 text-cyan-400" />
+                        ) : (
+                          <User className="w-7 h-7 text-cyan-400" />
+                        )}
                       </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                  </button>
-                ))}
+                      
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="text-lg font-semibold text-foreground">
+                          {account.displayName}
+                          {account.isAdmin && <span className="text-muted-foreground ml-1">(Admin)</span>}
+                        </div>
+                        <div className="text-sm text-muted-foreground">{account.role}</div>
+                        <div className="text-sm text-cyan-400 font-mono">Clearance Level {account.clearance}</div>
+                      </div>
+                      
+                      {/* Chevron */}
+                      <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-cyan-400 flex-shrink-0" />
+                    </button>
+                  ))
+                )}
               </div>
-            )}
+            </div>
           </div>
         ) : (
-          // Selected account - password entry
-          <div className="w-80 animate-fade-in">
-            <div className="flex flex-col items-center mb-6">
-              <div className={`w-24 h-24 rounded-full bg-gradient-to-br ${selectedAccount.avatarColor} flex items-center justify-center text-white text-3xl font-bold shadow-2xl mb-4 ring-4 ring-white/10`}>
-                {selectedAccount.displayName.charAt(0).toUpperCase()}
-              </div>
-              <h2 className="text-xl font-semibold text-foreground">{selectedAccount.displayName}</h2>
-              <p className="text-sm text-muted-foreground">
-                {selectedAccount.isAdmin ? "Administrator" : "User"}
-              </p>
-            </div>
-
-            {selectedAccount.hasPassword ? (
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="relative">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                    autoFocus
-                    disabled={loading}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 text-foreground placeholder:text-muted-foreground/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-none transition-all"
-                  />
+          // Password entry panel
+          <div className="w-full max-w-md mx-4">
+            <div className="rounded-2xl border border-cyan-500/30 bg-slate-800/50 backdrop-blur-sm p-6">
+              {/* Back button */}
+              <button
+                onClick={handleBack}
+                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-cyan-400 mb-6"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to users
+              </button>
+              
+              {/* Selected user info */}
+              <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-600/50">
+                <div className="w-16 h-16 rounded-full bg-cyan-900/50 border border-cyan-500/30 flex items-center justify-center">
+                  {selectedAccount.isAdmin ? (
+                    <Shield className="w-8 h-8 text-cyan-400" />
+                  ) : (
+                    <User className="w-8 h-8 text-cyan-400" />
+                  )}
                 </div>
-
-                {error && (
-                  <div className="text-sm text-red-400 text-center animate-shake">
-                    {error}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full py-3 rounded-xl bg-primary/20 border border-primary/30 text-primary font-medium hover:bg-primary/30 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Signing in...
-                    </>
-                  ) : (
-                    "Sign in"
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="w-full py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  ← Back to accounts
-                </button>
-              </form>
-            ) : (
-              <div className="space-y-4">
-                <button
-                  onClick={handleLogin}
-                  disabled={loading}
-                  className="w-full py-3 rounded-xl bg-primary/20 border border-primary/30 text-primary font-medium hover:bg-primary/30 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Signing in...
-                    </>
-                  ) : (
-                    "Sign in"
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="w-full py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  ← Back to accounts
-                </button>
+                <div>
+                  <div className="text-xl font-semibold text-foreground">{selectedAccount.displayName}</div>
+                  <div className="text-sm text-muted-foreground">{selectedAccount.role}</div>
+                  <div className="text-sm text-cyan-400 font-mono">Clearance Level {selectedAccount.clearance}</div>
+                </div>
               </div>
-            )}
+              
+              {/* Password form or direct login */}
+              {selectedAccount.hasPassword ? (
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div>
+                    <label className="text-sm text-muted-foreground mb-2 block">Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <input
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Enter password"
+                        autoFocus
+                        disabled={loading}
+                        className="w-full pl-10 pr-4 py-3 rounded-lg bg-slate-700/50 border border-slate-600/50 text-foreground placeholder:text-muted-foreground/50 focus:border-cyan-500/50 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {error && (
+                    <div className="text-sm text-red-400 text-center py-2 px-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                      {error}
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-3 rounded-lg bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 font-medium hover:bg-cyan-500/30 disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Authenticating...
+                      </>
+                    ) : (
+                      "Sign In"
+                    )}
+                  </button>
+                </form>
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground text-center">
+                    No password required for this account
+                  </p>
+                  
+                  <button
+                    onClick={handleLogin}
+                    disabled={loading}
+                    className="w-full py-3 rounded-lg bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 font-medium hover:bg-cyan-500/30 disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Signing in...
+                      </>
+                    ) : (
+                      "Sign In"
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
 
-      {/* Center message when no account selected */}
-      {!selectedAccount && accounts.length > 0 && (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
-          <User className="w-20 h-20 mx-auto mb-6 text-muted-foreground/30" />
-          <p className="text-xl text-muted-foreground/50 font-light">
-            Select an account to sign in
-          </p>
-        </div>
-      )}
-
       {/* Time display - bottom right */}
-      <div className="absolute bottom-8 right-8 text-right">
-        <div className="text-6xl font-light text-foreground/90 tracking-tight">
+      <div className="absolute bottom-8 right-8 text-right z-10">
+        <div className="text-5xl font-light text-foreground/80 tracking-tight">
           {formatTime(time)}
         </div>
         <div className="text-lg text-muted-foreground mt-1">
@@ -303,7 +303,7 @@ export const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       </div>
 
       {/* System info - bottom left */}
-      <div className="absolute bottom-8 left-8 text-left">
+      <div className="absolute bottom-8 left-8 text-left z-10">
         <div className="text-sm font-medium text-foreground/80">UrbanShade OS</div>
         <div className="text-xs text-muted-foreground">v3.1 Deep Ocean</div>
       </div>
