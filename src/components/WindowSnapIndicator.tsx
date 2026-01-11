@@ -5,22 +5,24 @@ interface WindowSnapIndicatorProps {
 export const WindowSnapIndicator = ({ zone }: WindowSnapIndicatorProps) => {
   if (!zone) return null;
 
+  // Taskbar is at TOP (h-12 = 48px), so we need top offset of ~56px
+  // Bottom has power button area, so leave ~80px margin
   const getZoneStyles = () => {
     switch (zone) {
       case "left":
-        return "left-2 top-2 bottom-[68px] w-[49%]";
+        return "left-2 top-14 bottom-20 w-[49%]";
       case "right":
-        return "right-2 top-2 bottom-[68px] w-[49%]";
+        return "right-2 top-14 bottom-20 w-[49%]";
       case "top":
-        return "left-2 right-2 top-2 bottom-[68px]";
+        return "left-2 right-2 top-14 bottom-20";
       case "top-left":
-        return "left-2 top-2 w-[49%] h-[calc(50%-36px)]";
+        return "left-2 top-14 w-[49%] h-[calc(50%-68px)]";
       case "top-right":
-        return "right-2 top-2 w-[49%] h-[calc(50%-36px)]";
+        return "right-2 top-14 w-[49%] h-[calc(50%-68px)]";
       case "bottom-left":
-        return "left-2 bottom-[68px] w-[49%] h-[calc(50%-36px)]";
+        return "left-2 bottom-20 w-[49%] h-[calc(50%-68px)]";
       case "bottom-right":
-        return "right-2 bottom-[68px] w-[49%] h-[calc(50%-36px)]";
+        return "right-2 bottom-20 w-[49%] h-[calc(50%-68px)]";
       default:
         return "";
     }
