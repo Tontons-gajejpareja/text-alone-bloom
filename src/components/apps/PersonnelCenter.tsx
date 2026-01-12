@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Users, Trophy, Award, Calendar, Search, Star, MessageSquare, Clock, Medal, Lock, Check, Bell, PartyPopper, Wrench, Megaphone, Shield, Crown, Heart, UserPlus, ChevronRight, Loader2, WifiOff } from "lucide-react";
+import { Users, Trophy, Award, Calendar, Search, Star, MessageSquare, Clock, Medal, Lock, Check, Bell, PartyPopper, Wrench, Megaphone, Shield, Crown, Heart, UserPlus, ChevronRight, Loader2, WifiOff, Zap } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -14,8 +14,9 @@ import { useOnlineAccount } from "@/hooks/useOnlineAccount";
 import { supabase } from "@/integrations/supabase/client";
 import { Achievement, getRarityColor, getRarityBgColor } from "@/lib/achievements";
 import { toast } from "sonner";
+import { BattlePassTab } from "@/components/BattlePassTab";
 
-type MainTab = "directory" | "leaderboards" | "achievements" | "events";
+type MainTab = "directory" | "leaderboards" | "achievements" | "battlepass" | "events";
 
 interface SystemEvent {
   id: string;
@@ -49,21 +50,25 @@ export const PersonnelCenter = () => {
         </div>
         
         <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as MainTab)}>
-          <TabsList className="w-full grid grid-cols-4 h-9">
-            <TabsTrigger value="directory" className="text-xs gap-1.5">
-              <Users className="w-3.5 h-3.5" />
+          <TabsList className="w-full grid grid-cols-5 h-9">
+            <TabsTrigger value="directory" className="text-xs gap-1">
+              <Users className="w-3 h-3" />
               Directory
             </TabsTrigger>
-            <TabsTrigger value="leaderboards" className="text-xs gap-1.5">
-              <Trophy className="w-3.5 h-3.5" />
-              Leaderboards
+            <TabsTrigger value="leaderboards" className="text-xs gap-1">
+              <Trophy className="w-3 h-3" />
+              Ranks
             </TabsTrigger>
-            <TabsTrigger value="achievements" className="text-xs gap-1.5">
-              <Award className="w-3.5 h-3.5" />
-              Achievements
+            <TabsTrigger value="achievements" className="text-xs gap-1">
+              <Award className="w-3 h-3" />
+              Achieve
             </TabsTrigger>
-            <TabsTrigger value="events" className="text-xs gap-1.5">
-              <Calendar className="w-3.5 h-3.5" />
+            <TabsTrigger value="battlepass" className="text-xs gap-1">
+              <Zap className="w-3 h-3" />
+              Pass
+            </TabsTrigger>
+            <TabsTrigger value="events" className="text-xs gap-1">
+              <Calendar className="w-3 h-3" />
               Events
             </TabsTrigger>
           </TabsList>
@@ -76,6 +81,7 @@ export const PersonnelCenter = () => {
           {mainTab === "directory" && <DirectoryTab />}
           {mainTab === "leaderboards" && <LeaderboardsTab />}
           {mainTab === "achievements" && <AchievementsTab userId={userId} />}
+          {mainTab === "battlepass" && <BattlePassTab userId={userId} />}
           {mainTab === "events" && <EventsTab />}
         </div>
       </ScrollArea>
