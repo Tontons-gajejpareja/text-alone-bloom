@@ -1,6 +1,7 @@
 /**
  * Achievement Triggers Hook
  * Centralized logic for triggering achievements throughout the app
+ * Also integrates with Quest tracking for Battle Pass
  */
 
 import { useCallback } from 'react';
@@ -15,6 +16,13 @@ const STORAGE_KEYS = {
   LOGIN_DATES: 'achievement_login_dates',
   SESSION_START: 'achievement_session_start',
   THEME_CHANGED: 'achievement_theme_changed',
+};
+
+// Quest progress tracking event dispatcher
+export const dispatchQuestProgress = (trackingType: string, increment: number = 1, params?: Record<string, any>) => {
+  window.dispatchEvent(new CustomEvent('quest-progress', { 
+    detail: { trackingType, increment, params } 
+  }));
 };
 
 // Helper to get current user ID
@@ -63,6 +71,10 @@ export async function checkTimeAchievements(): Promise<void> {
 // Track app opens and grant explorer achievements
 export async function trackAppOpen(appId: string): Promise<void> {
   const userId = await getCurrentUserId();
+  
+  // Dispatch quest progress for app opens
+  dispatchQuestProgress('app_open', 1, { appId });
+  
   if (!userId) return;
 
   const stored = localStorage.getItem(STORAGE_KEYS.OPENED_APPS);
@@ -71,6 +83,9 @@ export async function trackAppOpen(appId: string): Promise<void> {
   if (!openedApps.includes(appId)) {
     openedApps.push(appId);
     localStorage.setItem(STORAGE_KEYS.OPENED_APPS, JSON.stringify(openedApps));
+    
+    // Also track unique apps for quests
+    dispatchQuestProgress('unique_app_open', 1, { totalOpened: openedApps.length });
     
     // Check thresholds
     if (openedApps.length >= 5) {
@@ -85,6 +100,9 @@ export async function trackAppOpen(appId: string): Promise<void> {
 
 // Track chat messages
 export async function trackChatMessage(): Promise<void> {
+  // Dispatch quest progress for chat messages
+  dispatchQuestProgress('chat_message', 1);
+  
   const userId = await getCurrentUserId();
   if (!userId) return;
 
@@ -101,6 +119,9 @@ export async function trackChatMessage(): Promise<void> {
 
 // Track terminal commands
 export async function trackTerminalCommand(command: string): Promise<void> {
+  // Dispatch quest progress for terminal commands
+  dispatchQuestProgress('terminal_command', 1, { command });
+  
   const userId = await getCurrentUserId();
   if (!userId) return;
 
@@ -110,6 +131,9 @@ export async function trackTerminalCommand(command: string): Promise<void> {
   if (!commands.includes(command)) {
     commands.push(command);
     localStorage.setItem(STORAGE_KEYS.TERMINAL_COMMANDS, JSON.stringify(commands));
+    
+    // Track unique terminal commands for quests
+    dispatchQuestProgress('unique_terminal_command', 1, { totalCommands: commands.length });
     
     if (commands.length >= 20) {
       await grantAchievement(userId, 'terminal_hacker');
@@ -171,6 +195,9 @@ export async function trackLogin(): Promise<void> {
 
 // Track window count for multitasking achievements
 export async function trackWindowCount(count: number): Promise<void> {
+  // Dispatch quest progress for window count
+  dispatchQuestProgress('window_count', 0, { count });
+  
   const userId = await getCurrentUserId();
   if (!userId) return;
 
@@ -180,6 +207,9 @@ export async function trackWindowCount(count: number): Promise<void> {
 
 // Track theme change
 export async function trackThemeChange(): Promise<void> {
+  // Dispatch quest progress for theme change
+  dispatchQuestProgress('theme_change', 1);
+  
   const userId = await getCurrentUserId();
   if (!userId) return;
 

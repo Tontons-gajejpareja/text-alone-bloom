@@ -34,108 +34,68 @@ export const ChangelogDialog = () => {
       icon: <Rocket className="w-5 h-5" />,
       color: "from-rose-500 to-orange-600",
       tagline: "THE YEAR UPDATE",
-      overview: "The biggest update yet! Containment Breach horror game, redesigned App Store matching Plugin Store style, improved login screen, window snapping fixes, and much more.",
+      overview: "The biggest update yet! Battle Pass system, quest tracking, Containment Breach game, redesigned App Store, and much more.",
       sections: {
+        "Battle Pass System": [
+          "NEW: Full Battle Pass with 100 levels and seasonal rewards",
+          "Quest system with 5 rarities: Common, Uncommon, Rare, Epic, Legendary",
+          "Quests reset every 6 hours with random selection",
+          "XP progression with passive earning (1 XP/min)",
+          "Claimable rewards: Titles, Themes, Leaderboard Points",
+          "Season 1: Genesis (Q1 2025) fully planned",
+          "Season 2: Phantom Protocol (Q2 2025) pre-loaded",
+          "Battle Pass tab in Personnel Center"
+        ],
+        "Theme System Overhaul": [
+          "NEW: 12 Battle Pass exclusive themes",
+          "Themes section in Settings showing all presets",
+          "Lock icons for themes not yet unlocked",
+          "Instant theme preview and application"
+        ],
+        "New Achievements": [
+          "10 new achievements added (48 total)",
+          "battlepass_complete - Complete a Battle Pass",
+          "quest_streak_10 - Complete 10 quests in a row",
+          "legendary_quest - Complete a Legendary quest",
+          "speed_demon, file_explorer_pro, calculator_use, and more"
+        ],
         "Containment Breach Game": [
           "NEW: FNAF-style horror game in the App Store",
           "Survive 5 nights monitoring escaped memetic hazards",
           "Camera system with periodic ping sweeps",
-          "Audio lures, containment shocks, and door blocks",
-          "8 unique subjects with Z-## designations and special abilities",
-          "Memetic visual effects - screen distortion, fake signals",
-          "Unlockable lore documents after each night",
-          "Power management and breach warning system"
+          "8 unique subjects with special abilities",
+          "Unlockable lore documents after each night"
         ],
         "App Store Redesign": [
           "NEW: Visual overhaul matching Plugin Store aesthetic",
           "Gradient backgrounds with category-colored icons",
-          "Improved card layout with better spacing",
-          "Cyan accent color scheme for install buttons",
-          "Featured apps section with compact cards",
-          "Streamlined Browse/Installed tabs"
+          "Improved card layout with better spacing"
         ],
         "UI Improvements": [
           "Fixed window snapping to work with top taskbar layout",
-          "Snap zones now properly avoid taskbar and bottom UI",
           "Login screen with improved visual hierarchy",
-          "Desktop maintains clean modern aesthetic"
+          "Personnel Center now has 5 tabs including Battle Pass"
         ],
         "NAVI AI": [
           "NEW: AI-powered assistant in moderation #chat channel",
           "Query with @NAVI for real-time system insights",
-          "Analyzes NAVI Autonomous actions and reports",
-          "Smart filtering - rejects frivolous messages",
-          "Terminal-style error responses for denied access"
+          "Smart filtering - rejects frivolous messages"
         ],
         "Creator Role": [
           "NEW: Creator role - highest privilege level",
-          "NEW: Golden styling for creator badges throughout UI",
-          "Creators can demote admins (admins cannot demote each other)",
-          "Protected: Creators cannot be demoted"
+          "Golden styling for creator badges throughout UI",
+          "Creators can demote admins"
         ],
         "NAVI Autonomous System": [
-          "NEW: Graduated threat levels (Normal, Elevated, Warning, Critical, Emergency)",
-          "NEW: Auto-warn users at 5x threshold",
-          "NEW: Auto temp-ban top offenders at emergency level",
-          "NEW: Auto-lockdown at configurable multiplier (default 10x)",
-          "NEW: Velocity detection - catches accelerating attacks",
-          "NEW: Adaptive thresholds based on 24h rolling average"
-        ],
-        "NAVI Messaging": [
-          "NEW: Welcome messages for first-time users",
-          "NEW: Degraded service notices during emergencies",
-          "NEW: Warning messages to flagged users",
-          "All message types individually toggleable"
-        ],
-        "StatusPage Integration": [
-          "NEW: Dedicated status page at urbanshade.statuspage.io",
-          "Support Center now links to external StatusPage",
-          "Real-time incident tracking and updates"
-        ],
-        "Account Manager": [
-          "NEW: Cloud login directly in Account Manager",
-          "Sign in or create account from acc-manage/general",
-          "Visual cloud connection status indicator",
-          "Seamless sync toggle and status display"
-        ],
-        "Ban System Overhaul": [
-          "Redesigned BannedScreen with NAVI AI styling",
-          "Temporary ban popup with countdown timer",
-          "Persistent temp ban banner with remaining time",
-          "Fake ban reveal animation - prank your friends!",
-          "Improved ban checking with offline resilience"
-        ],
-        "Friends System": [
-          "Send and accept friend requests",
-          "Friends tab in Messages app",
-          "Visual indicators for friend status",
-          "Priority messaging to friends"
-        ],
-        "Messages Revamp": [
-          "Tabbed interface - Inbox, Friends, All Users",
-          "User badges showing roles (Admin, Mod, VIP, Creator)",
-          "NAVI broadcast styling for system messages",
-          "Real-time message updates via Supabase Realtime"
-        ],
-        "Moderation Panel Overhaul": [
-          "Redesigned with sidebar navigation for better UX",
-          "Real-time activity monitoring tab",
-          "Statistics dashboard with charts",
-          "Bulk moderation actions (warn/ban/VIP)",
-          "Replaced imprecise sliders with number inputs",
-          "Added Export button to Personnel tab"
-        ],
-        "Support Center": [
-          "NEW: /support page with FAQ and contact options",
-          "Comprehensive FAQ library with 40+ searchable questions",
-          "Live chat interface for contacting admins",
-          "Quick links to documentation and status page"
+          "NEW: Graduated threat levels",
+          "Auto-warn, auto-temp-ban, auto-lockdown",
+          "Adaptive thresholds based on rolling average"
         ],
         "Database Additions": [
-          "navi_settings table for configuration storage",
-          "navi_auto_actions table for action logging",
-          "user_first_login table for welcome tracking",
-          "navi_threshold_history table for adaptive learning"
+          "battlepass_seasons table for season configuration",
+          "user_battlepass table for progress tracking",
+          "user_quests table for quest management",
+          "user_titles table for earned titles"
         ]
       }
     },
