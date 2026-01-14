@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Waves, Shield, Database, Lock } from "lucide-react";
+import { Shield, Database, Lock } from "lucide-react";
 import { VERSION } from "@/lib/versionInfo";
 
 interface ShutdownScreenProps {
@@ -64,7 +64,7 @@ export const ShutdownScreen = ({ onComplete }: ShutdownScreenProps) => {
           {/* Logo */}
           <div className="flex items-center justify-center gap-4 mb-12">
             <div className="relative">
-              <Waves className="w-20 h-20 text-cyan-400 animate-pulse" />
+              <img src="/favicon.svg" alt="UrbanShade" className="w-20 h-20 animate-pulse" />
               <div className="absolute inset-0 w-20 h-20 bg-cyan-400 rounded-full blur-xl opacity-30 animate-pulse" />
             </div>
           </div>
@@ -114,7 +114,7 @@ export const ShutdownScreen = ({ onComplete }: ShutdownScreenProps) => {
     <div className="fixed inset-0 bg-gradient-to-b from-slate-950 to-slate-900 flex flex-col items-center justify-center text-white font-mono">
       {/* Header */}
       <div className="absolute top-8 left-8 flex items-center gap-3 text-cyan-400/60">
-        <Waves className="w-6 h-6" />
+        <img src="/favicon.svg" alt="UrbanShade" className="w-6 h-6" />
         <span className="text-sm font-medium">UrbanShade OS</span>
       </div>
 

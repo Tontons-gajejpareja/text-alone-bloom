@@ -1,4 +1,4 @@
-import { ArrowLeft, Terminal, Rocket, Folder, Map, Keyboard, HelpCircle, Zap, Waves, Shield, Bug, BookOpen, Cpu, Package } from "lucide-react";
+import { ArrowLeft, Terminal, Rocket, Folder, Map, Keyboard, HelpCircle, Zap, Shield, Bug, BookOpen, Cpu, Package } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DocSearch } from "@/components/DocSearch";
 import SupabaseConnectivityChecker from "@/components/SupabaseConnectivityChecker";
@@ -205,7 +205,7 @@ const Docs = () => {
         {/* Hero */}
         <section className="text-center space-y-6">
           <div className="relative inline-block">
-            <Waves className="w-20 h-20 mx-auto text-primary animate-pulse" />
+            <img src="/favicon.svg" alt="UrbanShade" className="w-20 h-20 mx-auto animate-pulse" />
             <div className="absolute -inset-4 bg-primary/20 blur-xl rounded-full -z-10" />
           </div>
           

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Monitor, HardDrive, Disc, Folder, Check, ChevronRight, Waves, Shield, Zap, Settings, Clock } from "lucide-react";
+import { Monitor, HardDrive, Disc, Folder, Check, ChevronRight, Shield, Settings, Clock } from "lucide-react";
 
 interface InstallerWizardProps {
   onComplete: (adminData: { username: string; password: string }) => void;
@@ -106,12 +106,6 @@ export const InstallerWizard = ({ onComplete }: InstallerWizardProps) => {
     onComplete({ username: "Administrator", password: "admin" });
   };
 
-  const handleExpressSetup = () => {
-    localStorage.setItem("urbanshade_first_boot", "true");
-    localStorage.setItem("urbanshade_install_type", "standard");
-    localStorage.setItem("urbanshade_computer_name", "URBANSHADE-01");
-    onComplete({ username: "Administrator", password: "" });
-  };
 
   const canFinish = installComplete && userConfigComplete;
 
@@ -133,12 +127,10 @@ export const InstallerWizard = ({ onComplete }: InstallerWizardProps) => {
         <div className="max-w-3xl mx-auto">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-                <Waves className="w-5 h-5 text-white" />
-              </div>
+              <img src="/favicon.svg" alt="UrbanShade" className="w-10 h-10" />
               <div>
                 <div className="text-cyan-100 font-bold text-sm">URBANSHADE OS</div>
-                <div className="text-cyan-500/70 text-xs">Setup Wizard v2.3</div>
+                <div className="text-cyan-500/70 text-xs">Setup Wizard v3.0</div>
               </div>
             </div>
             <div className="flex items-center gap-2 text-xs text-cyan-500/50">
@@ -182,7 +174,6 @@ export const InstallerWizard = ({ onComplete }: InstallerWizardProps) => {
           {stage === "welcome" && (
             <WelcomeScreen 
               onNext={() => setStage("install-type")} 
-              onExpress={handleExpressSetup}
             />
           )}
           
@@ -250,55 +241,47 @@ export const InstallerWizard = ({ onComplete }: InstallerWizardProps) => {
   );
 };
 
-// Welcome screen with Express Setup option
-const WelcomeScreen = ({ onNext, onExpress }: { onNext: () => void; onExpress: () => void }) => {
+// Welcome screen
+const WelcomeScreen = ({ onNext }: { onNext: () => void }) => {
   return (
     <div className="text-center space-y-8">
       <div>
-        <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 flex items-center justify-center">
-          <Shield className="w-12 h-12 text-cyan-400" />
+        <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 flex items-center justify-center overflow-hidden">
+          <img src="/favicon.svg" alt="UrbanShade" className="w-16 h-16" />
         </div>
         <h1 className="text-3xl font-bold text-white mb-2">Welcome to UrbanShade OS</h1>
         <p className="text-cyan-400/70">Deep Sea Facility Management System</p>
       </div>
       
-      <div className="grid gap-4 max-w-md mx-auto">
-        <button
-          onClick={onNext}
-          className="group p-6 rounded-xl bg-gradient-to-br from-cyan-500/10 to-blue-600/10 border border-cyan-500/30 hover:border-cyan-400 hover:from-cyan-500/20 hover:to-blue-600/20 transition-all text-left"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500/30 transition-colors">
-              <Settings className="w-6 h-6 text-cyan-400" />
-            </div>
-            <div>
-              <div className="text-lg font-bold text-cyan-100">Standard Install</div>
-              <div className="text-sm text-slate-400">Configure installation options</div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-cyan-500 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-        </button>
-        
-        <button
-          onClick={onExpress}
-          className="group p-6 rounded-xl bg-slate-800/50 border border-slate-700 hover:border-slate-600 hover:bg-slate-800 transition-all text-left"
-        >
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-slate-700/50 flex items-center justify-center group-hover:bg-slate-700 transition-colors">
-              <Zap className="w-6 h-6 text-slate-400 group-hover:text-cyan-400 transition-colors" />
-            </div>
-            <div>
-              <div className="text-lg font-medium text-slate-300">Express Setup</div>
-              <div className="text-sm text-slate-500">Use default settings</div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-slate-500 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-        </button>
+      <div className="space-y-3 text-left max-w-sm mx-auto">
+        <div className="flex items-center gap-3 text-slate-300">
+          <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-sm font-bold">1</div>
+          <span>Choose installation type</span>
+        </div>
+        <div className="flex items-center gap-3 text-slate-300">
+          <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-sm font-bold">2</div>
+          <span>Select installation location</span>
+        </div>
+        <div className="flex items-center gap-3 text-slate-300">
+          <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-sm font-bold">3</div>
+          <span>Activate your license</span>
+        </div>
+        <div className="flex items-center gap-3 text-slate-300">
+          <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 text-sm font-bold">4</div>
+          <span>Configure system settings</span>
+        </div>
       </div>
       
+      <button
+        onClick={onNext}
+        className="w-full max-w-sm mx-auto py-4 px-6 rounded-xl bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 text-white font-semibold shadow-lg shadow-cyan-500/20 transition-all flex items-center justify-center gap-2"
+      >
+        Begin Setup
+        <ChevronRight className="w-5 h-5" />
+      </button>
+      
       <p className="text-xs text-slate-600 max-w-sm mx-auto">
-        Standard installation gives you control over components, location, and system settings.
-        Express setup uses optimal defaults for quick deployment.
+        Installation takes about 2-10 minutes depending on the selected configuration.
       </p>
     </div>
   );

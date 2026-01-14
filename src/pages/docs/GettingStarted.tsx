@@ -1,4 +1,4 @@
-import { ArrowLeft, Rocket, User, Monitor, CheckCircle, LogIn, Layout, Zap } from "lucide-react";
+import { ArrowLeft, Rocket, User, Monitor, CheckCircle, LogIn, Layout } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const GettingStarted = () => {
@@ -35,35 +35,28 @@ const GettingStarted = () => {
           <div className="p-6 rounded-xl bg-slate-800/50 border border-cyan-500/20 space-y-4">
             <p className="text-slate-400">
               When you first launch URBANSHADE OS, you'll be greeted by our streamlined installer. 
-              Choose your installation type or use Express Setup for quick deployment:
+              Choose your installation type based on your needs:
             </p>
             <ul className="space-y-3 ml-4">
               <li className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-cyan-400 mt-0.5" />
                 <div>
                   <span className="font-bold text-cyan-300">Minimal</span>
-                  <span className="text-slate-400"> - Core system only for backup terminals</span>
+                  <span className="text-slate-400"> - Core system only for backup terminals (~2 min)</span>
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-cyan-400 mt-0.5" />
                 <div>
                   <span className="font-bold text-cyan-300">Standard</span>
-                  <span className="text-slate-400"> - Essential facility tools (recommended)</span>
+                  <span className="text-slate-400"> - Essential facility tools, recommended (~5 min)</span>
                 </div>
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-cyan-400 mt-0.5" />
                 <div>
                   <span className="font-bold text-cyan-300">Complete</span>
-                  <span className="text-slate-400"> - All applications and research modules</span>
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <Zap className="w-5 h-5 text-amber-400 mt-0.5" />
-                <div>
-                  <span className="font-bold text-amber-400">Express Setup</span>
-                  <span className="text-slate-400"> - Skip configuration and use optimal defaults</span>
+                  <span className="text-slate-400"> - All applications and research modules (~10 min)</span>
                 </div>
               </li>
             </ul>
