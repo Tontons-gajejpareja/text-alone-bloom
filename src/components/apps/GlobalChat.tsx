@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { UserAvatar } from '@/components/shared/UserAvatar';
 import { 
   Send, 
   Reply, 
@@ -200,13 +201,23 @@ const GlobalChat: React.FC = () => {
 
                 {/* Message header */}
                 <div className="flex items-center gap-2 text-sm">
-                  <span className={cn(
-                    "font-semibold",
-                    msg.user_role === 'creator' && "text-amber-400",
-                    msg.user_role === 'admin' && "text-red-400",
-                    msg.is_vip && "text-purple-400",
-                    !msg.user_id && "text-muted-foreground"
-                  )}>
+                  <UserAvatar
+                    userId={msg.user_id || undefined}
+                    username={msg.display_name}
+                    role={msg.user_role || undefined}
+                    isVip={msg.is_vip || false}
+                    size="xs"
+                    clickable={!!msg.user_id}
+                  />
+                  <span 
+                    className={cn(
+                      "font-semibold cursor-pointer hover:underline",
+                      msg.user_role === 'creator' && "text-amber-400",
+                      msg.user_role === 'admin' && "text-red-400",
+                      msg.is_vip && "text-purple-400",
+                      !msg.user_id && "text-muted-foreground"
+                    )}
+                  >
                     {msg.display_name}
                   </span>
                   {getRoleBadge(msg)}
